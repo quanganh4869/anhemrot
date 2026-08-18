@@ -1,69 +1,70 @@
-import Image from "next/image";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import StoryHero from "@/components/story/StoryHero";
+import StoryContent, { StorySection } from "@/components/story/StoryContent";
 
 export default function Home() {
+  const storySections: StorySection[] = [
+    {
+      type: "paragraph",
+      content: "Once upon a time, in a dense and magical forest, lived a tiny bug named Sparky. Sparky was a firefly, but there was one small problem. He didn't know how to shine his light.",
+    },
+    {
+      type: "paragraph",
+      content: "All of his friends would soar into the night sky, their tails glowing brightly like little stars dancing among the trees. Sparky would try with all his might, squeezing his eyes shut and wiggling his tail, but not even a flicker would appear.",
+    },
+    {
+      type: "image",
+      src: "/images/sad_firefly.png",
+      alt: "Sparky looking sad because he cannot glow",
+    },
+    {
+      type: "paragraph",
+      content: "One evening, feeling very sad, Sparky sat on a large oak leaf while the others played 'Tag the Moon'. An old, wise moth named Barnaby landed gently beside him.",
+    },
+    {
+      type: "paragraph",
+      content: "'Why the gloomy face, little one?' asked Barnaby, his fuzzy antennae twitching.",
+    },
+    {
+      type: "paragraph",
+      content: "'I can't glow,' Sparky sighed. 'I want to light up the forest with my friends, but my light is broken.'",
+    },
+    {
+      type: "paragraph",
+      content: "Barnaby chuckled softly. 'Your light isn't broken, Sparky. You are just trying too hard to be like everyone else. Your light doesn't come from squeezing your eyes. It comes from the joy in your heart.'",
+    },
+    {
+      type: "image",
+      src: "/images/happy_firefly.png",
+      alt: "Sparky finally lighting up the forest",
+    },
+    {
+      type: "paragraph",
+      content: "Sparky thought about this. He stopped trying to force his glow. Instead, he thought about his favorite things: the taste of sweet nectar, the soft evening breeze, and the laughter of his friends.",
+    },
+    {
+      type: "paragraph",
+      content: "Suddenly, he felt a warm, tickly feeling in his tummy. It grew warmer and brighter, until—POP! A brilliant, golden light burst from his tail! It was the brightest light the forest had ever seen.",
+    },
+    {
+      type: "paragraph",
+      content: "From that day on, Sparky never had trouble finding his light. He just had to remember what made him happy.",
+    }
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+      <main className="flex-grow">
+        <StoryHero 
+          title="How Firefly Got His Light"
+          author="Daniel Errico"
+          coverImage="/images/hero_firefly.png"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        <StoryContent sections={storySections} />
       </main>
+      <Footer />
     </div>
   );
 }
