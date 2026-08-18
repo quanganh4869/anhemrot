@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -23,11 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${fredoka.variable} ${nunito.variable} antialiased font-sans`}
       >
-        {children}
+        <ThemeProvider>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
