@@ -103,7 +103,6 @@ export default function StoryCanvas() {
           scene={scene} 
           isPlaying={state.isPlaying} 
           isEditor={true}
-          selectedLayerId={state.selectedLayerId}
           onLayerClick={(id) => dispatch({ type: "SELECT_LAYER", payload: id })}
           overlay={overlay}
         />
