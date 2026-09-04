@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { ChapterAnimConfig, Scene } from "@/types/story-anim";
+import { ChapterAnimConfig } from "@/types/story-anim";
 import SceneRenderer from "./SceneRenderer";
 
 interface ScrollStoryReaderProps {

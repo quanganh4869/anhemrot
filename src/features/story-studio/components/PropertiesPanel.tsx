@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useEditor } from "../EditorProvider";
-import { AnimationPresetType, Scene } from "@/types/story-anim";
+import { AnimationPresetType, Scene, TransitionConfig } from "@/types/story-anim";
 
 const ANIMATION_PRESETS: { value: AnimationPresetType; label: string }[] = [
   { value: "none", label: "None" },
@@ -64,7 +64,7 @@ export default function PropertiesPanel() {
             <div className="flex gap-2">
               <select 
                 value={scene.transition.type}
-                onChange={(e) => handleSceneUpdate({ transition: { ...scene.transition, type: e.target.value as any } })}
+                onChange={(e) => handleSceneUpdate({ transition: { ...scene.transition, type: e.target.value as TransitionConfig["type"] } })}
                 className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-600"
               >
                 <option value="none">None</option>
@@ -86,7 +86,7 @@ export default function PropertiesPanel() {
               onChange={(e) => handleSceneUpdate({ 
                 background: { 
                   ...scene.background, 
-                  animation: { ...scene.background.animation, preset: e.target.value as any } 
+                  animation: { ...scene.background.animation, preset: e.target.value as AnimationPresetType } 
                 } 
               })}
               className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-600"

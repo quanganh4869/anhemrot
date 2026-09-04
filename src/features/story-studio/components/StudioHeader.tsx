@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { ArrowLeft, Undo2, Redo2, Play, Save, Check, Loader2 } from "lucide-react";
+import React from "react";
+import { ArrowLeft, Play, Undo2, Redo2, Check, Loader2 } from "lucide-react";
 import { useEditor } from "../EditorProvider";
-import { mockStorage } from "@/services/mockStorage";
 
 interface StudioHeaderProps {
   onPreview: () => void;

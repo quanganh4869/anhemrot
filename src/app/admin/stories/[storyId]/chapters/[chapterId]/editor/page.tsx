@@ -51,16 +51,16 @@ function EditorContent() {
   useEffect(() => {
     if (isInitializing) return;
 
-    setSaveStatus('saving');
-    
     const handler = setTimeout(async () => {
+      setSaveStatus('saving');
       try {
         await mockStorage.saveChapterConfig(state.config);
         setSaveStatus('saved');
         
         // Reset back to idle after a few seconds
         setTimeout(() => setSaveStatus('idle'), 2000);
-      } catch (e) {
+      } catch (error) {
+        console.error("Save failed:", error);
         setSaveStatus('error');
       }
     }, 1000); // 1000ms debounce

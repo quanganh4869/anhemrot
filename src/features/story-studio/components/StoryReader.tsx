@@ -18,8 +18,8 @@ export default function StoryReader({ config, onClose }: StoryReaderProps) {
   const scenes = config.scenes;
   const currentScene = scenes[currentSceneIndex];
 
-  const handleNext = () => setCurrentSceneIndex(Math.min(scenes.length - 1, currentSceneIndex + 1));
-  const handlePrev = () => setCurrentSceneIndex(Math.max(0, currentSceneIndex - 1));
+  const handleNext = React.useCallback(() => setCurrentSceneIndex(Math.min(scenes.length - 1, currentSceneIndex + 1)), [currentSceneIndex, scenes.length]);
+  const handlePrev = React.useCallback(() => setCurrentSceneIndex(Math.max(0, currentSceneIndex - 1)), [currentSceneIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,7 +28,7 @@ export default function StoryReader({ config, onClose }: StoryReaderProps) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentSceneIndex, scenes.length]);
+  }, [handleNext, handlePrev]);
 
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
   const handleTouchEnd = (e: React.TouchEvent) => {

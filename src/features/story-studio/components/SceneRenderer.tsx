@@ -11,13 +11,12 @@ interface SceneRendererProps {
   className?: string;
   // If true, we hide overflow. If false, maybe show handles?
   isEditor?: boolean; 
-  selectedLayerId?: string | null;
   onLayerClick?: (layerId: string) => void;
   overlay?: React.ReactNode;
   scrollProgress?: number; // 0 to 1
 }
 
-export default function SceneRenderer({ scene, isPlaying, className, isEditor, selectedLayerId, onLayerClick, overlay, scrollProgress }: SceneRendererProps) {
+export default function SceneRenderer({ scene, isPlaying, className, isEditor, onLayerClick, overlay, scrollProgress }: SceneRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // We need to restart animations when `isPlaying` changes from false to true.

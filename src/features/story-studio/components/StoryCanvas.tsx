@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useEditor } from "../EditorProvider";
 import SceneRenderer from "./SceneRenderer";
 

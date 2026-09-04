@@ -1,4 +1,4 @@
-import { Scene, ProcessingJob, Layer } from "@/types/story-anim";
+import { Scene, ProcessingJob, Layer, AnimationPresetType } from "@/types/story-anim";
 import { processPdfToImages } from "./pdfProcessor";
 import { mockStorage } from "./mockStorage";
 
@@ -54,7 +54,7 @@ export class StoryPipeline {
     
     urls.forEach((url, index) => {
       // Alternate presets logically
-      const bgPreset = backgrounds[index % backgrounds.length] as any;
+      const bgPreset = backgrounds[index % backgrounds.length] as AnimationPresetType;
       const isIntro = index === 0;
       
       const layers: Layer[] = [];

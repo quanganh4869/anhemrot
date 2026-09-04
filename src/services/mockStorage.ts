@@ -1,4 +1,4 @@
-import { ChapterAnimConfig, Scene } from "@/types/story-anim";
+import { ChapterAnimConfig } from "@/types/story-anim";
 
 export const MOCK_DELAY = 800;
 
