@@ -1,22 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import imports
+from app.api.v1.endpoints import imports, auth
 
 app = FastAPI(
     title="Interactive Visual Storytelling API",
-    description="API for the Scrollytelling platform",
+    description="API for the interactive cinematic web comic reading platform.",
     version="1.0.0"
 )
 
-# Setup CORS for the React frontend
+# Configure CORS for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # Adjust in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(imports.router, prefix="/api/v1/import", tags=["import"])
 
 @app.get("/")

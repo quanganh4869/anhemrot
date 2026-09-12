@@ -3,8 +3,9 @@ from fastapi import APIRouter, UploadFile, File, BackgroundTasks, Depends, HTTPE
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.core.database import get_db
-from app.models.domain import ImportJob, Asset
+from app.models.domain import ImportJob, Asset, User
 from app.services.import_pipeline import ImportPipeline
+from app.api.deps import get_current_admin
 
 router = APIRouter()
 
@@ -14,7 +15,8 @@ MAX_FILE_SIZE = 50 * 1024 * 1024 # 50 MB
 async def upload_asset(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
 ):
     # Read file completely into memory (fine for <= 50MB, larger needs stream parsing)
     file_bytes = await file.read()
@@ -46,7 +48,11 @@ async def upload_asset(
     return {"job_id": job_id, "status": "pending", "message": "File is being processed in the background."}
 
 @router.get("/jobs/{job_id}")
-async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
+async def get_job_status(
+    job_id: str, 
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
     result = await db.execute(select(ImportJob).where(ImportJob.id == job_id))
     job = result.scalar_one_or_none()
     if not job:
@@ -62,7 +68,10 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
     }
 
 @router.get("/assets")
-async def list_assets(db: AsyncSession = Depends(get_db)):
+async def list_assets(
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
     # Simple list API
     result = await db.execute(select(Asset).order_by(Asset.created_at.desc()))
     assets = result.scalars().all()
