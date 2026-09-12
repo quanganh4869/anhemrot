@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { StoryConfig } from "../types";
 import ChapterReader from "./ChapterReader";
-import CinematicIntro from "./ui/CinematicIntro";
 import ReadingProgress from "./ui/ReadingProgress";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -11,36 +12,41 @@ interface StoryReaderProps {
 }
 
 export default function StoryReader({ story }: StoryReaderProps) {
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
   const currentChapter = story.chapters[0];
 
   return (
-    <div className="w-full bg-black min-h-screen text-white font-sans overflow-x-hidden selection:bg-white/30 relative flex flex-col group/reader">
-      <CinematicIntro title={story.title} isReady={isReady} />
+    <div className="w-full bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans">
       <ReadingProgress />
+      
+      {/* 1. Header identical to Home */}
+      <Header />
 
-      {/* Subtle UI Overlay - Appears only when hovered near top */}
-      <div className="fixed top-0 left-0 w-full h-24 z-50 opacity-0 group-hover/reader:opacity-100 hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-black/80 to-transparent flex items-start px-6 pt-6">
-        <Link 
-          href={`/stories/nightmare-dream`}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-medium uppercase tracking-widest">{story.title}</span>
-        </Link>
-      </div>
+      {/* 2. Main Reader Content: Fitted to screen with standard editorial margins, NOT full screen lock */}
+      <main className="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col items-center">
+        
+        {/* Navigation Breadcrumb / Chapter Title */}
+        <div className="w-full mb-6 pb-4 border-b border-zinc-800 flex items-center justify-between text-sm">
+          <Link 
+            href={`/stories/${story.id || 'nightmare-dream'}`}
+            className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Quay lại chi tiết</span>
+          </Link>
 
-      <main className="flex-grow relative z-10 w-full">
-         <ChapterReader chapter={currentChapter} />
+          <div className="font-serif text-zinc-200 text-base">
+            <span>{story.title}</span> &bull; <span className="text-zinc-400">{currentChapter.title}</span>
+          </div>
+        </div>
+
+        {/* Comic / Story Container: Fit with monitor, border framed, natural scroll */}
+        <div className="w-full bg-black rounded-xl border border-zinc-800 shadow-2xl overflow-hidden">
+          <ChapterReader chapter={currentChapter} />
+        </div>
       </main>
+
+      {/* 3. Footer identical to Home */}
+      <Footer />
     </div>
   );
 }

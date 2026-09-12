@@ -35,31 +35,31 @@ export default function GlobalAudioPlayer() {
   }, [hasInteracted]);
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current.play()
-          .then(() => setIsPlaying(true))
-          .catch(() => { /* silent catch */ });
-      }
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.warn("[Audio] Autoplay or playback blocked:", err);
+      });
+    } else {
+      audio.pause();
+      setIsPlaying(false);
     }
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 items-end">
-      {/* 
-        This wrapper is designed so the chatbot can also be added here later.
-        The music button will sit at the bottom right.
-      */}
-      
       {/* Background Audio Element */}
       <audio
         ref={audioRef}
         src="/audio/OpeningAnimee.wav"
         loop
         preload="auto"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
       />
 
       {/* Music Toggle Button */}

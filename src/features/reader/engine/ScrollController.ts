@@ -17,11 +17,12 @@ export class ScrollController {
     return ScrollTrigger.create({
       animation: tl,
       trigger: containerEl,
-      start: "top top", // When top of container hits top of viewport
-      end: `+=${sceneConfig.scrollDuration}`, 
+      start: "top 72px", // When top of scene reaches just below the sticky header
+      end: `+=${sceneConfig.scrollDuration || '200vh'}`, 
       pin: sceneConfig.pin,
-      scrub: sceneConfig.scrub,
-      // markers: process.env.NODE_ENV === 'development',
+      pinSpacing: true,
+      scrub: typeof sceneConfig.scrub === 'number' ? sceneConfig.scrub : 1,
+      invalidateOnRefresh: true,
     });
   }
 }

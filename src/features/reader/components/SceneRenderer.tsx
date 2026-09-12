@@ -24,10 +24,6 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
 
     // Build timeline via separated controller
     const tl = AnimationController.createTimeline(parsedScene, layersRef.current, isReducedMotion);
-    
-    // Add scene-level fade out (crossfade transition) at the very end (90% to 100%)
-    // Since SCENE_DURATION_MULTIPLIER = 1, we can add it to the timeline
-    tl.to(containerRef.current, { opacity: 0, duration: 0.1 }, 0.9);
 
     // Attach to scroll via separated controller
     ScrollController.attach(tl, containerRef.current, parsedScene);
@@ -37,14 +33,9 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden bg-[#050505] flex items-center justify-center"
+      className="relative w-full aspect-[16/9] min-h-[460px] max-h-[75vh] overflow-hidden bg-black flex items-center justify-center"
     >
-      {/* 
-        Constrained Viewport: Like Webtoon or Tapas, we constrain the width 
-        on large screens so the user doesn't have to read across a massive monitor.
-        It forms a neat vertical column (or cinematic box) in the center.
-      */}
-      <div className="relative w-full h-full max-w-4xl bg-black overflow-hidden shadow-2xl border-x border-zinc-900">
+      <div className="relative w-full h-full overflow-hidden">
         {scene.layers.map((layer, i) => (
           <SceneLayer 
             key={layer.id} 

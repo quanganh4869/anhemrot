@@ -1,5 +1,4 @@
-import React, { forwardRef, useState } from "react";
-import Image from "next/image";
+import React, { forwardRef } from "react";
 import { LayerConfig } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -9,8 +8,6 @@ interface SceneLayerProps {
 
 const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(
   ({ layer }, ref) => {
-    const [isLoaded, setIsLoaded] = useState(false);
-
     // Base styling ensuring performance
     const style: React.CSSProperties = {
       zIndex: layer.zIndex,
@@ -30,19 +27,16 @@ const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(
         case 'effect':
           if (layer.assetUrl) {
             return (
-              <div className="w-full h-full relative">
-                {!isLoaded && (
-                  <div className="absolute inset-0 bg-zinc-900/50 animate-pulse rounded-md blur-sm backdrop-blur-xl z-[-1]" />
-                )}
-                <Image
+              <div className="w-full h-full relative flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={layer.assetUrl} 
                   alt={layer.type}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
-                  style={{ objectFit: 'cover' }}
-                  onLoad={() => setIsLoaded(true)}
-                  className={cn("transition-opacity duration-700", isLoaded ? "opacity-100" : "opacity-0")}
-                  priority={layer.type === 'background'} // Only preload backgrounds of first scenes if we could, but type='background' is a good heuristic
+                  className={cn(
+                    "w-full h-full pointer-events-none select-none",
+                    layer.type === 'background' ? "object-cover" : "object-contain"
+                  )}
+                  loading="eager"
                 />
               </div>
             );

@@ -1,11 +1,15 @@
 "use client";
 
-import React, { use } from "react";
+import React from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
-export default function StoryDetailPage(props: { params: Promise<{ storyId: string }> }) {
-  const params = use(props.params);
+export default function StoryDetailPage() {
+  const routeParams = useParams<{ storyId: string }>();
+  const storyId = routeParams?.storyId || "nightmare-dream";
   const { language } = useLanguage();
 
   const story = {
@@ -25,17 +29,10 @@ export default function StoryDetailPage(props: { params: Promise<{ storyId: stri
   };
 
   return (
-    <div className="w-full bg-zinc-950 min-h-screen text-zinc-100 font-sans pb-32">
-      
-      {/* Minimal Nav */}
-      <nav className="w-full px-6 py-8 flex justify-between items-center max-w-7xl mx-auto border-b border-zinc-900 mb-12">
-        <Link href="/" className="font-serif text-2xl font-bold tracking-tight">
-          S.
-        </Link>
-        <div className="flex gap-6 text-sm font-medium text-zinc-400">
-          <Link href="/" className="hover:text-zinc-100 transition-colors">Library</Link>
-        </div>
-      </nav>
+    <div className="w-full bg-zinc-950 min-h-screen text-zinc-100 font-sans flex flex-col">
+      <Header />
+
+      <main className="flex-grow max-w-7xl mx-auto px-6 py-12 flex flex-col">
 
       <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row gap-16 lg:gap-24">
         
@@ -81,7 +78,7 @@ export default function StoryDetailPage(props: { params: Promise<{ storyId: stri
               {story.chapters.map((ch, idx) => (
                 <Link 
                   key={ch.id} 
-                  href={ch.isLocked ? "#" : `/stories/${params.storyId}/read`}
+                  href={ch.isLocked ? "#" : `/stories/${storyId}/read`}
                   className={`group flex items-baseline gap-6 py-6 border-b border-zinc-900 transition-colors ${
                     ch.isLocked ? "opacity-40 cursor-not-allowed" : "hover:bg-zinc-900/50"
                   }`}
@@ -100,7 +97,7 @@ export default function StoryDetailPage(props: { params: Promise<{ storyId: stri
           
           {!story.chapters[0].isLocked && (
              <Link 
-               href={`/stories/${params.storyId}/read`}
+               href={`/stories/${storyId}/read`}
                className="inline-block mt-8 px-12 py-4 bg-white text-black font-semibold hover:bg-zinc-200 transition-colors"
              >
                Start Reading
@@ -110,6 +107,9 @@ export default function StoryDetailPage(props: { params: Promise<{ storyId: stri
         </div>
 
       </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
