@@ -37,9 +37,14 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden bg-black flex items-center justify-center"
+      className="relative w-full h-screen overflow-hidden bg-[#050505] flex items-center justify-center"
     >
-      <div className="relative w-full h-full max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)] bg-zinc-900 overflow-hidden shadow-2xl">
+      {/* 
+        Constrained Viewport: Like Webtoon or Tapas, we constrain the width 
+        on large screens so the user doesn't have to read across a massive monitor.
+        It forms a neat vertical column (or cinematic box) in the center.
+      */}
+      <div className="relative w-full h-full max-w-4xl bg-black overflow-hidden shadow-2xl border-x border-zinc-900">
         {scene.layers.map((layer, i) => (
           <SceneLayer 
             key={layer.id} 
