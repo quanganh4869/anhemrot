@@ -64,12 +64,27 @@ class Story(Base):
     description = Column(Text)
     status = Column(String, default="draft")
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    chapters = relationship("Chapter", back_populates="story", lazy="selectin")
+
+class Chapter(Base):
+    __tablename__ = "chapters"
+    id = Column(String, primary_key=True, index=True)
+    story_id = Column(String, ForeignKey("stories.id"), index=True)
+    title = Column(String, nullable=False)
+    order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    story = relationship("Story", back_populates="chapters")
+    scenes = relationship("Scene", back_populates="chapter", lazy="selectin")
 
 class Scene(Base):
     __tablename__ = "scenes"
     id = Column(String, primary_key=True, index=True)
-    story_id = Column(String, ForeignKey("stories.id"))
-    chapter_id = Column(String, nullable=True)
+    story_id = Column(String, ForeignKey("stories.id"), index=True)
+    chapter_id = Column(String, ForeignKey("chapters.id"), index=True, nullable=True)
     order = Column(Integer, default=0)
     config_json = Column(JSON, nullable=False) # Validated by Zod on frontend
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    chapter = relationship("Chapter", back_populates="scenes")

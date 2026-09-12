@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import imports, auth
+from app.api.v1.endpoints import imports, auth, stories, chapters, scenes
 
 app = FastAPI(
     title="Interactive Visual Storytelling API",
@@ -18,6 +18,9 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(stories.router, prefix="/api/v1/stories", tags=["stories"])
+app.include_router(chapters.router, prefix="/api/v1", tags=["chapters"])
+app.include_router(scenes.router, prefix="/api/v1", tags=["scenes"])
 app.include_router(imports.router, prefix="/api/v1/import", tags=["import"])
 
 @app.get("/")
