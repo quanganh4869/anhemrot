@@ -61,23 +61,6 @@ export const mockStoryData: StoryConfig = {
               ]
             },
             {
-              id: "s1-fg-mist",
-              type: "foreground",
-              content: "mist",
-              zIndex: 15,
-              animations: [
-                {
-                  id: "s1-mist-move",
-                  property: "translateY",
-                  from: { value: "10%" },
-                  to: { value: "-30%" },
-                  startProgress: 0,
-                  endProgress: 1,
-                  ease: "none"
-                }
-              ]
-            },
-            {
               id: "s1-narr-1",
               type: "narration",
               content: "Thuở sơ khai, khi giấc mơ chưa có tên gọi, bóng tối và ánh sáng vẫn đan xen làm một...",
@@ -112,6 +95,7 @@ export const mockStoryData: StoryConfig = {
           scrollDuration: "250vh",
           pin: true,
           scrub: 1,
+          backgroundColor: "#ffffff",
           layers: [
             {
               id: "s2-bg",
@@ -150,45 +134,12 @@ export const mockStoryData: StoryConfig = {
               ]
             },
             {
-              id: "s2-title",
-              type: "ui",
-              content: "Cơn Ác Mộng Muốn Trở Thành Một Giấc Mơ Đẹp",
-              zIndex: 20,
-              x: "5%", y: "40%", width: "90%",
-              animations: [
-                {
-                  id: "s2-t-fade",
-                  property: "opacity",
-                  from: { value: 0 },
-                  to: { value: 1 },
-                  startProgress: 0.1,
-                  endProgress: 0.3
-                },
-                {
-                  id: "s2-t-slide",
-                  property: "translateY",
-                  from: { value: "30px" },
-                  to: { value: "0px" },
-                  startProgress: 0.1,
-                  endProgress: 0.3,
-                  ease: "power2.out"
-                },
-                {
-                  id: "s2-t-out",
-                  property: "opacity",
-                  from: { value: 1 },
-                  to: { value: 0 },
-                  startProgress: 0.7,
-                  endProgress: 0.9
-                }
-              ]
-            },
-            {
               id: "s2-narr",
               type: "narration",
               content: "Một sinh linh nhỏ bé cất tiếng khóc đầu tiên giữa ranh giới của cõi mộng...",
               zIndex: 25,
-              x: "10%", y: "65%",
+              x: "10%", y: "75%",
+              className: "!text-zinc-800 drop-shadow-none font-medium",
               animations: [
                 {
                   id: "s2-n-fade",

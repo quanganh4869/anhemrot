@@ -57,7 +57,6 @@ export const LayerConfigSchema = z.object({
 export type LayerConfigInput = z.input<typeof LayerConfigSchema>;
 export type LayerConfig = z.infer<typeof LayerConfigSchema>;
 
-// --- Scene Config ---
 export const SceneConfigSchema = z.object({
   version: z.string().optional().default("1.0"),
   id: z.string(),
@@ -65,6 +64,8 @@ export const SceneConfigSchema = z.object({
   scrollDuration: z.string().optional().default("100vh"),
   pin: z.boolean().optional().default(true),
   scrub: z.union([z.boolean(), z.number()]).optional().default(true),
+  backgroundColor: z.string().optional(),
+  className: z.string().optional(),
   layers: z.array(LayerConfigSchema),
 });
 export type SceneConfigInput = z.input<typeof SceneConfigSchema>;

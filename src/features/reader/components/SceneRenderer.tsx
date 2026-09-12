@@ -36,11 +36,12 @@ export default function SceneRenderer({ scene, isFocusMode = false }: SceneRende
   return (
     <div 
       ref={containerRef}
+      style={{ backgroundColor: scene.backgroundColor || '#000000' }}
       className={cn(
-        "relative overflow-hidden bg-black flex items-center justify-center select-none",
+        "relative overflow-hidden flex items-center justify-center select-none w-full",
         isFocusMode 
-          ? "w-full h-screen" 
-          : "w-full aspect-[16/9] min-h-[440px] max-h-[80vh] rounded-sm"
+          ? "h-screen" 
+          : "h-[calc(100vh-72px)] min-h-[500px]"
       )}
     >
       <div className="relative w-full h-full">

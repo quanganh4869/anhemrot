@@ -25,10 +25,8 @@ export default function AtmosphericEffect({ type = "floating_lights", className 
   if (type === "mist" || type === "fog") {
     return (
       <div className={cn("w-full h-full pointer-events-none relative overflow-hidden", className)}>
-        {/* Subtle dual-layer drifting mist */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-80" />
-        <div className="absolute -inset-x-20 bottom-0 h-1/2 bg-gradient-to-t from-white/5 via-white/[0.02] to-transparent blur-3xl transform animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-black/20 to-black/60" />
+        {/* Soft ethereal ambient mist */}
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white/10 via-white/[0.03] to-transparent pointer-events-none" />
       </div>
     );
   }
