@@ -1,5 +1,7 @@
 "use client";
 
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import ScrollStoryReader from "@/features/story-studio/components/ScrollStoryReader";
 import { ChapterAnimConfig, Scene, AnimationPresetType } from "@/types/story-anim";
@@ -110,12 +112,13 @@ export default function Home() {
   mockAnimatedStory.scenes[1].layers[1].fontWeight = "bold";
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      {/* We hide the traditional Header and Footer to make it a fully immersive experience */}
-      <main className="w-full h-full">
+    <div className="bg-black text-white min-h-screen flex flex-col">
+      <Header />
+      <main className="w-full flex-grow">
         {/* Scroll-based storytelling effect */}
         <ScrollStoryReader config={mockAnimatedStory} />
       </main>
+      <Footer />
     </div>
   );
 }
