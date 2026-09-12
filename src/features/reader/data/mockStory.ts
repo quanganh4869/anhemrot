@@ -36,6 +36,48 @@ export const mockStoryData: StoryConfig = {
               ]
             },
             {
+              id: "s1-fx-lights",
+              type: "effect",
+              content: "floating_lights",
+              zIndex: 10,
+              animations: [
+                {
+                  id: "s1-fx-move",
+                  property: "translateY",
+                  from: { value: "0%" },
+                  to: { value: "-25%" },
+                  startProgress: 0,
+                  endProgress: 1,
+                  ease: "none"
+                },
+                {
+                  id: "s1-fx-fade",
+                  property: "opacity",
+                  from: { value: 0.3 },
+                  to: { value: 1 },
+                  startProgress: 0.1,
+                  endProgress: 0.5
+                }
+              ]
+            },
+            {
+              id: "s1-fg-mist",
+              type: "foreground",
+              content: "mist",
+              zIndex: 15,
+              animations: [
+                {
+                  id: "s1-mist-move",
+                  property: "translateY",
+                  from: { value: "10%" },
+                  to: { value: "-30%" },
+                  startProgress: 0,
+                  endProgress: 1,
+                  ease: "none"
+                }
+              ]
+            },
+            {
               id: "s1-narr-1",
               type: "narration",
               content: "Thuở sơ khai, khi giấc mơ chưa có tên gọi, bóng tối và ánh sáng vẫn đan xen làm một...",
@@ -84,6 +126,23 @@ export const mockStoryData: StoryConfig = {
                   property: "translateY",
                   from: { value: "0%" },
                   to: { value: "-4%" },
+                  startProgress: 0,
+                  endProgress: 1,
+                  ease: "none"
+                }
+              ]
+            },
+            {
+              id: "s2-fx-stardust",
+              type: "effect",
+              content: "stardust",
+              zIndex: 10,
+              animations: [
+                {
+                  id: "s2-star-lift",
+                  property: "translateY",
+                  from: { value: "10%" },
+                  to: { value: "-40%" },
                   startProgress: 0,
                   endProgress: 1,
                   ease: "none"
@@ -185,6 +244,29 @@ export const mockStoryData: StoryConfig = {
                   startProgress: 0,
                   endProgress: 1,
                   ease: "power1.out"
+                }
+              ]
+            },
+            {
+              id: "s3-fx-vignette",
+              type: "effect",
+              content: "vignette",
+              zIndex: 8,
+            },
+            {
+              id: "s3-fg-lights",
+              type: "foreground",
+              content: "floating_lights",
+              zIndex: 15,
+              animations: [
+                {
+                  id: "s3-fg-parallax",
+                  property: "translateY",
+                  from: { value: "20%" },
+                  to: { value: "-50%" },
+                  startProgress: 0,
+                  endProgress: 1,
+                  ease: "none"
                 }
               ]
             },
@@ -317,6 +399,23 @@ export const mockStoryData: StoryConfig = {
                   property: "translateY",
                   from: { value: "3%" },
                   to: { value: "-3%" },
+                  startProgress: 0,
+                  endProgress: 1,
+                  ease: "none"
+                }
+              ]
+            },
+            {
+              id: "s5-fx-lights",
+              type: "effect",
+              content: "floating_lights",
+              zIndex: 10,
+              animations: [
+                {
+                  id: "s5-lights-drift",
+                  property: "translateY",
+                  from: { value: "10%" },
+                  to: { value: "-40%" },
                   startProgress: 0,
                   endProgress: 1,
                   ease: "none"
@@ -477,6 +576,23 @@ export const mockStoryData: StoryConfig = {
                   property: "translateY",
                   from: { value: "4%" },
                   to: { value: "-4%" },
+                  startProgress: 0,
+                  endProgress: 1,
+                  ease: "none"
+                }
+              ]
+            },
+            {
+              id: "s7-fx-lights",
+              type: "effect",
+              content: "floating_lights",
+              zIndex: 10,
+              animations: [
+                {
+                  id: "s7-lights-soar",
+                  property: "translateY",
+                  from: { value: "30%" },
+                  to: { value: "-60%" },
                   startProgress: 0,
                   endProgress: 1,
                   ease: "none"

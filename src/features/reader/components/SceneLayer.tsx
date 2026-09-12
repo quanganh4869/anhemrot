@@ -1,6 +1,7 @@
 import React, { forwardRef } from "react";
 import { LayerConfig } from "../types";
 import { cn } from "@/lib/utils";
+import AtmosphericEffect from "./ui/AtmosphericEffect";
 
 interface SceneLayerProps {
   layer: LayerConfig;
@@ -23,8 +24,6 @@ const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(
         case 'background':
         case 'character':
         case 'object':
-        case 'foreground':
-        case 'effect':
           if (layer.assetUrl) {
             return (
               <div className="w-full h-full relative flex items-center justify-center">
@@ -42,6 +41,44 @@ const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(
             );
           }
           return null;
+
+        case 'foreground':
+          if (layer.assetUrl) {
+            return (
+              <div className="w-full h-full relative flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={layer.assetUrl} 
+                  alt="foreground"
+                  className={cn(
+                    "w-full h-full pointer-events-none select-none object-cover",
+                    layer.className
+                  )}
+                  loading="eager"
+                />
+              </div>
+            );
+          }
+          return <AtmosphericEffect type={layer.content || "mist"} className={layer.className} />;
+
+        case 'effect':
+          if (layer.assetUrl) {
+            return (
+              <div className="w-full h-full relative flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={layer.assetUrl} 
+                  alt="effect"
+                  className={cn(
+                    "w-full h-full pointer-events-none select-none mix-blend-screen",
+                    layer.className
+                  )}
+                  loading="eager"
+                />
+              </div>
+            );
+          }
+          return <AtmosphericEffect type={layer.content || "floating_lights"} className={layer.className} />;
         case 'narration':
           if (layer.content) {
             return (

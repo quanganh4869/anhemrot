@@ -73,7 +73,7 @@ const applyTweenOrKeyframes = (
     
     tl.fromTo(target, 
       { [propKey]: formatVal(config.from[propKey] ?? config.from.value) } as gsap.TweenVars, 
-      { [propKey]: formatVal(config.to[propKey] ?? config.to.value), duration, ease: config.ease || "none" } as gsap.TweenVars, 
+      { [propKey]: formatVal(config.to[propKey] ?? config.to.value), duration, ease: config.ease || "none", immediateRender: false } as gsap.TweenVars, 
       position
     );
   }
