@@ -57,12 +57,8 @@ export default function AtmosphericEffect({ type = "floating_lights", className 
     );
   }
 
-  // Default: floating_lights (dreamy light motes with soft glow)
   return (
     <div className={cn("w-full h-full pointer-events-none relative overflow-hidden", className)}>
-      {/* Ambient cinematic vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_50%,_rgba(0,0,0,0.65)_100%)]" />
-
       {/* Floating light motes */}
       {particles.map((p) => (
         <div

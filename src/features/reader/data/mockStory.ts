@@ -199,12 +199,6 @@ export const mockStoryData: StoryConfig = {
               ]
             },
             {
-              id: "s3-fx-vignette",
-              type: "effect",
-              content: "vignette",
-              zIndex: 8,
-            },
-            {
               id: "s3-fg-lights",
               type: "foreground",
               content: "floating_lights",

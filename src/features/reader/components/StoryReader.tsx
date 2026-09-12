@@ -118,12 +118,7 @@ export default function StoryReader({ story }: StoryReaderProps) {
       )}
 
       {/* 3. Main Reader Content Area */}
-      <main className={cn(
-        "flex-grow w-full",
-        isFocusMode 
-          ? "w-full" 
-          : "max-w-6xl mx-auto px-4 sm:px-6 py-6"
-      )}>
+      <main className="flex-grow w-full">
         {/* The Scenes */}
         <ChapterReader chapter={currentChapter} isFocusMode={isFocusMode} />
 

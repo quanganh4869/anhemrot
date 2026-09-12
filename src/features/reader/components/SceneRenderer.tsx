@@ -44,7 +44,8 @@ export default function SceneRenderer({ scene, isFocusMode = false }: SceneRende
           : "h-[calc(100vh-72px)] min-h-[500px]"
       )}
     >
-      <div className="relative w-full h-full">
+      {/* True 16:9 Artwork Canvas: Perfectly centered, never cropped, zero black gaps */}
+      <div className="relative w-full max-w-6xl aspect-[16/9] max-h-full overflow-hidden flex items-center justify-center">
         {scene.layers.map((layer, i) => (
           <SceneLayer 
             key={layer.id} 
