@@ -28,7 +28,7 @@ export const AnimationRegistry = new EngineRegistry();
 
 const createTween = (config: AnimationConfig, sceneDurationMultiplier: number) => {
   const duration = (config.endProgress - config.startProgress) * sceneDurationMultiplier;
-  const position = (config.startProgress + config.delay) * sceneDurationMultiplier;
+  const position = (config.startProgress + (config.delay || 0)) * sceneDurationMultiplier;
   return { duration, position };
 };
 
@@ -37,8 +37,8 @@ AnimationRegistry.register('opacity', {
   apply(tl, target, config, multiplier) {
     const { duration, position } = createTween(config, multiplier);
     tl.fromTo(target, 
-      { opacity: config.from.value ?? 0 }, 
-      { opacity: config.to.value ?? 1, duration, ease: config.ease }, 
+      { opacity: config.from.value ?? 0 } as gsap.TweenVars, 
+      { opacity: config.to.value ?? 1, duration, ease: config.ease || "none" } as gsap.TweenVars, 
       position
     );
   }
@@ -49,8 +49,8 @@ const buildTransformHandler = (propKey: string): AnimationHandler => ({
   apply(tl, target, config, multiplier) {
     const { duration, position } = createTween(config, multiplier);
     tl.fromTo(target, 
-      { [propKey]: config.from.value ?? 0 }, 
-      { [propKey]: config.to.value, duration, ease: config.ease }, 
+      { [propKey]: config.from.value ?? 0 } as gsap.TweenVars, 
+      { [propKey]: config.to.value, duration, ease: config.ease || "none" } as gsap.TweenVars, 
       position
     );
   }
@@ -66,8 +66,8 @@ AnimationRegistry.register('translate', {
   apply(tl, target, config, multiplier) {
     const { duration, position } = createTween(config, multiplier);
     tl.fromTo(target,
-      { x: config.from.x ?? 0, y: config.from.y ?? 0 },
-      { x: config.to.x, y: config.to.y, duration, ease: config.ease },
+      { x: config.from.x ?? 0, y: config.from.y ?? 0 } as gsap.TweenVars,
+      { x: config.to.x, y: config.to.y, duration, ease: config.ease || "none" } as gsap.TweenVars,
       position
     );
   }
@@ -78,8 +78,8 @@ AnimationRegistry.register('blur', {
   apply(tl, target, config, multiplier) {
     const { duration, position } = createTween(config, multiplier);
     tl.fromTo(target,
-      { filter: `blur(${config.from.value ?? 0}px)` },
-      { filter: `blur(${config.to.value}px)`, duration, ease: config.ease },
+      { filter: `blur(${config.from.value ?? 0}px)` } as gsap.TweenVars,
+      { filter: `blur(${config.to.value}px)`, duration, ease: config.ease || "none" } as gsap.TweenVars,
       position
     );
   }
@@ -90,8 +90,8 @@ AnimationRegistry.register('camera_zoom', {
   apply(tl, target, config, multiplier) {
     const { duration, position } = createTween(config, multiplier);
     tl.fromTo(target,
-      { scale: config.from.scale ?? 1 },
-      { scale: config.to.scale, duration, ease: config.ease },
+      { scale: config.from.scale ?? 1 } as gsap.TweenVars,
+      { scale: config.to.scale, duration, ease: config.ease || "none" } as gsap.TweenVars,
       position
     );
   }
@@ -102,8 +102,8 @@ AnimationRegistry.register('parallax', {
     const { duration, position } = createTween(config, multiplier);
     // Simple vertical parallax
     tl.fromTo(target,
-      { y: config.from.y ?? 0 },
-      { y: config.to.y, duration, ease: config.ease },
+      { y: config.from.y ?? 0 } as gsap.TweenVars,
+      { y: config.to.y, duration, ease: config.ease || "none" } as gsap.TweenVars,
       position
     );
   }

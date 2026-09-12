@@ -10,17 +10,21 @@ export const AnimPropertySchema = z.enum([
 ]);
 export type AnimProperty = z.infer<typeof AnimPropertySchema>;
 
+const TweenValueSchema = z.union([z.string(), z.number()]);
+
 // --- Animation Config ---
 export const AnimationConfigSchema = z.object({
   id: z.string(),
   property: AnimPropertySchema,
   startProgress: z.number().min(0).max(1),
   endProgress: z.number().min(0).max(1),
-  from: z.record(z.any()).optional().default({}),
-  to: z.record(z.any()),
-  ease: z.string().optional().default("none"),
-  delay: z.number().optional().default(0), // optional delay in progress scale
+  from: z.record(z.string(), TweenValueSchema).optional().default({}),
+  to: z.record(z.string(), TweenValueSchema),
+  ease: z.string().optional(),
+  delay: z.number().optional(), // optional delay in progress scale
 });
+// Using input to allow omitting optional properties in mock data
+export type AnimationConfigInput = z.input<typeof AnimationConfigSchema>;
 export type AnimationConfig = z.infer<typeof AnimationConfigSchema>;
 
 // --- Layer Config ---
@@ -29,24 +33,26 @@ export const LayerConfigSchema = z.object({
   type: LayerTypeSchema,
   content: z.string().optional(),
   assetUrl: z.string().optional(),
-  zIndex: z.number().default(10),
-  x: z.union([z.string(), z.number()]).default(0),
-  y: z.union([z.string(), z.number()]).default(0),
+  zIndex: z.number().optional().default(10),
+  x: z.union([z.string(), z.number()]).optional().default(0),
+  y: z.union([z.string(), z.number()]).optional().default(0),
   width: z.union([z.string(), z.number()]).optional(),
   height: z.union([z.string(), z.number()]).optional(),
   transformOrigin: z.string().optional().default("center center"),
   className: z.string().optional(),
-  animations: z.array(AnimationConfigSchema).default([]),
+  animations: z.array(AnimationConfigSchema).optional().default([]),
 });
+export type LayerConfigInput = z.input<typeof LayerConfigSchema>;
 export type LayerConfig = z.infer<typeof LayerConfigSchema>;
 
 // --- Scene Config ---
 export const SceneConfigSchema = z.object({
   id: z.string(),
   order: z.number(),
-  scrollDuration: z.string().default("100vh"),
-  pin: z.boolean().default(true),
-  scrub: z.union([z.boolean(), z.number()]).default(true),
+  scrollDuration: z.string().optional().default("100vh"),
+  pin: z.boolean().optional().default(true),
+  scrub: z.union([z.boolean(), z.number()]).optional().default(true),
   layers: z.array(LayerConfigSchema),
 });
+export type SceneConfigInput = z.input<typeof SceneConfigSchema>;
 export type SceneConfig = z.infer<typeof SceneConfigSchema>;

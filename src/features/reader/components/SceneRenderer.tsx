@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { SceneConfig } from "../types";
+import { SceneConfig, SceneConfigSchema } from "../types";
 import SceneLayer from "./SceneLayer";
 import { AnimationController } from "../engine/AnimationController";
 import { ScrollController } from "../engine/ScrollController";
@@ -19,11 +19,14 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
     // Check accessibility preference
     const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Parse config to populate defaults
+    const parsedScene = SceneConfigSchema.parse(scene);
+
     // Build timeline via separated controller
-    const tl = AnimationController.createTimeline(scene, layersRef.current, isReducedMotion);
+    const tl = AnimationController.createTimeline(parsedScene, layersRef.current, isReducedMotion);
     
     // Attach to scroll via separated controller
-    ScrollController.attach(tl, containerRef.current, scene);
+    ScrollController.attach(tl, containerRef.current, parsedScene);
 
   }, { scope: containerRef, dependencies: [scene] });
 

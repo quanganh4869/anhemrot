@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save, Eye, Play, Layers, Settings, MonitorPlay } from "lucide-react";
-import { SceneConfig, LayerConfig } from "@/features/reader/engine/schema";
+import { SceneConfig, LayerConfig, SceneConfigSchema } from "@/features/reader/engine/schema";
 import { mockStoryData } from "@/features/reader/data/mockStory";
 
 // Placeholder for sub-components
@@ -13,8 +13,8 @@ import PropertiesPanel from "./components/PropertiesPanel";
 import TimelinePanel from "./components/TimelinePanel";
 
 export default function VisualSceneEditorPage({ params }: { params: { storyId: string, sceneId: string } }) {
-  // Load mock data for the scene
-  const initialScene = mockStoryData.chapters[0].scenes[0];
+  // Load mock data for the scene and parse it to populate defaults (strict type)
+  const initialScene = SceneConfigSchema.parse(mockStoryData.chapters[0].scenes[0]);
   
   const [scene, setScene] = useState<SceneConfig>(initialScene);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
