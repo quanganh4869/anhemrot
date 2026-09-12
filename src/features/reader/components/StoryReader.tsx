@@ -5,6 +5,10 @@ import ReadingProgress from "./ui/ReadingProgress";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface StoryReaderProps {
   story: StoryConfig;
@@ -13,6 +17,14 @@ interface StoryReaderProps {
 export default function StoryReader({ story }: StoryReaderProps) {
   const currentChapter = story.chapters[0];
   const [isNavVisible, setIsNavVisible] = useState(true);
+
+  // Refresh ScrollTrigger once scenes mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-hide navigation after 2 seconds of inactivity, show on mouse movement
   useEffect(() => {
@@ -56,6 +68,34 @@ export default function StoryReader({ story }: StoryReaderProps) {
       {/* Main Reader Canvas: Full bleed, no generic containers, controlled by scenes */}
       <main className="w-full">
         <ChapterReader chapter={currentChapter} />
+
+        {/* Cinematic Chapter Completion / Epilogue */}
+        <section className="w-full min-h-[50vh] bg-black flex flex-col items-center justify-center text-center px-6 py-24 border-t border-zinc-900">
+          <span className="text-xs uppercase tracking-[0.3em] text-zinc-500 mb-4">
+            Hoàn thành chương
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-serif text-zinc-100 font-bold mb-4">
+            {currentChapter.title}
+          </h2>
+          <p className="text-zinc-400 font-serif italic max-w-md mb-12 text-lg">
+            Cảm ơn bạn đã đồng hành cùng chuyến hành trình vào Vùng Đất Giấc Mơ.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="px-8 py-3.5 border border-zinc-700 hover:border-zinc-400 text-zinc-200 hover:text-white transition-colors text-sm font-medium tracking-wider uppercase"
+            >
+              Đọc lại từ đầu
+            </button>
+            <Link
+              href={`/stories/${story.id || 'nightmare-dream'}`}
+              className="px-8 py-3.5 bg-white text-black hover:bg-zinc-200 transition-colors text-sm font-semibold tracking-wider uppercase"
+            >
+              Về trang chi tiết
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );

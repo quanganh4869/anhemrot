@@ -42,12 +42,35 @@ const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(
             );
           }
           return null;
-        case 'dialogue':
         case 'narration':
           if (layer.content) {
             return (
-              <div className="text-xl md:text-3xl font-serif text-white p-6 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl inline-block max-w-[80vw]">
-                {layer.content}
+              <div className="max-w-2xl px-6 py-4">
+                <p className="font-serif text-xl sm:text-2xl md:text-3xl text-zinc-100 font-normal tracking-wide leading-relaxed drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)]">
+                  {layer.content}
+                </p>
+              </div>
+            );
+          }
+          return null;
+        case 'dialogue':
+          if (layer.content) {
+            return (
+              <div className="max-w-xl px-6 py-3.5 bg-black/70 border-l-2 border-zinc-200 backdrop-blur-sm shadow-2xl">
+                <p className="font-sans text-base sm:text-lg text-zinc-100 font-medium leading-relaxed tracking-normal">
+                  {layer.content}
+                </p>
+              </div>
+            );
+          }
+          return null;
+        case 'ui':
+          if (layer.content) {
+            return (
+              <div className="text-center px-6">
+                <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl text-white font-bold tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
+                  {layer.content}
+                </h2>
               </div>
             );
           }
