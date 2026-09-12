@@ -19,8 +19,10 @@
     "pdfjs-dist": "^3.11.174",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-rnd": "^10.5.3",
     "tailwind-merge": "^3.6.0",
-    "zod": "^4.6.2"
+    "zod": "^4.6.2",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

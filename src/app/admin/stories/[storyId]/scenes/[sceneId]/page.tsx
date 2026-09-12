@@ -1,25 +1,32 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Eye, Play, Layers, Settings, MonitorPlay } from "lucide-react";
-import { SceneConfig, LayerConfig, SceneConfigSchema } from "@/features/reader/engine/schema";
+import { ArrowLeft, Save, Play, Layers, Settings, MonitorPlay, Undo2, Redo2 } from "lucide-react";
+import { SceneConfigSchema } from "@/features/reader/engine/schema";
 import { mockStoryData } from "@/features/reader/data/mockStory";
+import { useEditorStore } from "./store/editorStore";
 
 // Placeholder for sub-components
 import LayerTree from "./components/LayerTree";
 import SceneCanvas from "./components/SceneCanvas";
 import PropertiesPanel from "./components/PropertiesPanel";
 import TimelinePanel from "./components/TimelinePanel";
+import SceneRenderer from "@/features/reader/components/SceneRenderer";
 
 export default function VisualSceneEditorPage({ params }: { params: { storyId: string, sceneId: string } }) {
   // Load mock data for the scene and parse it to populate defaults (strict type)
   const initialScene = SceneConfigSchema.parse(mockStoryData.chapters[0].scenes[0]);
   
-  const [scene, setScene] = useState<SceneConfig>(initialScene);
-  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const { scene, initScene, selectedLayerId, selectLayer, undo, redo, history, future } = useEditorStore();
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  // Initialize store on mount
+  useEffect(() => {
+    initScene(initialScene);
+  }, [initScene, initialScene]);
+
+  if (!scene) return null; // loading state
 
   const selectedLayer = scene.layers.find(l => l.id === selectedLayerId);
 
@@ -41,12 +48,9 @@ export default function VisualSceneEditorPage({ params }: { params: { storyId: s
             Exit Preview
           </button>
         </div>
-        <div className="flex-1 overflow-auto">
-          {/* We would render SceneRenderer here, wrapped in a scroll container */}
-          <div className="w-full h-[300vh] flex items-start justify-center">
-             <div className="sticky top-0 w-full h-screen flex items-center justify-center border-4 border-dashed border-zinc-700">
-                <span className="text-zinc-500">Scroll to preview (GSAP ScrollTrigger active)</span>
-             </div>
+        <div className="flex-1 overflow-auto bg-zinc-950">
+          <div className="w-full relative" style={{ height: scene.scrollDuration || '300vh' }}>
+             <SceneRenderer scene={scene} />
           </div>
         </div>
       </div>
@@ -68,7 +72,26 @@ export default function VisualSceneEditorPage({ params }: { params: { storyId: s
         </div>
         
         <div className="flex items-center gap-3">
-          <span className="text-xs text-zinc-500">
+          <div className="flex items-center gap-1 border-r border-zinc-700 pr-3 mr-1">
+            <button 
+              onClick={undo} 
+              disabled={history.length === 0}
+              className="p-1.5 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+              title="Undo"
+            >
+              <Undo2 className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={redo} 
+              disabled={future.length === 0}
+              className="p-1.5 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+              title="Redo"
+            >
+              <Redo2 className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <span className="text-xs text-zinc-500 w-16 text-right">
             {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? 'Saved.' : ''}
           </span>
           <button 
@@ -100,7 +123,7 @@ export default function VisualSceneEditorPage({ params }: { params: { storyId: s
           <LayerTree 
             layers={scene.layers} 
             selectedId={selectedLayerId} 
-            onSelect={setSelectedLayerId} 
+            onSelect={selectLayer} 
           />
         </aside>
 

@@ -50,27 +50,42 @@ export default function PropertiesPanel({ layer }: PropertiesPanelProps) {
       {/* Animations Config */}
       <div>
         <div className="flex justify-between items-center mb-3">
-           <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Animations ({layer.animations.length})</h3>
+           <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Animations ({layer.animations?.length || 0})</h3>
            <button className="text-xs flex items-center gap-1 text-emerald-400 hover:text-emerald-300">
              <Plus className="w-3 h-3" /> Add
            </button>
         </div>
         
         <div className="space-y-3">
-          {layer.animations.map((anim) => (
+          {layer.animations?.map((anim) => (
             <div key={anim.id} className="bg-zinc-950 border border-zinc-800 rounded p-3">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-semibold text-zinc-200 capitalize">{anim.property}</span>
-                <span className="text-xs text-zinc-500">{anim.startProgress} → {anim.endProgress}</span>
+                {anim.keyframes ? (
+                   <span className="text-xs text-zinc-500">{anim.keyframes.length} Keyframes</span>
+                ) : (
+                   <span className="text-xs text-zinc-500">{anim.startProgress} → {anim.endProgress}</span>
+                )}
               </div>
               <div className="text-xs text-zinc-400 space-y-1">
-                 <p>From: {JSON.stringify(anim.from)}</p>
-                 <p>To: {JSON.stringify(anim.to)}</p>
-                 <p>Ease: {anim.ease}</p>
+                 {anim.keyframes ? (
+                    anim.keyframes.map((kf, i) => (
+                      <div key={i} className="flex justify-between border-t border-zinc-800 pt-1 mt-1">
+                        <span>{kf.progress * 100}%</span>
+                        <span>{JSON.stringify(kf.values)}</span>
+                      </div>
+                    ))
+                 ) : (
+                    <>
+                      <p>From: {JSON.stringify(anim.from)}</p>
+                      <p>To: {JSON.stringify(anim.to)}</p>
+                      <p>Ease: {anim.ease}</p>
+                    </>
+                 )}
               </div>
             </div>
           ))}
-          {layer.animations.length === 0 && (
+          {(!layer.animations || layer.animations.length === 0) && (
             <p className="text-xs text-zinc-500">No animations configured.</p>
           )}
         </div>

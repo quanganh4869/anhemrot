@@ -13,15 +13,27 @@ export type AnimProperty = z.infer<typeof AnimPropertySchema>;
 const TweenValueSchema = z.union([z.string(), z.number()]);
 
 // --- Animation Config ---
+export const KeyframeSchema = z.object({
+  progress: z.number().min(0).max(1),
+  values: z.record(z.string(), TweenValueSchema),
+  ease: z.string().optional(),
+});
+export type KeyframeConfig = z.infer<typeof KeyframeSchema>;
+
 export const AnimationConfigSchema = z.object({
   id: z.string(),
   property: AnimPropertySchema,
-  startProgress: z.number().min(0).max(1),
-  endProgress: z.number().min(0).max(1),
-  from: z.record(z.string(), TweenValueSchema).optional().default({}),
-  to: z.record(z.string(), TweenValueSchema),
+  
+  // Legacy 2-point setup (will be migrated/deprecated in future)
+  startProgress: z.number().min(0).max(1).optional(),
+  endProgress: z.number().min(0).max(1).optional(),
+  from: z.record(z.string(), TweenValueSchema).optional(),
+  to: z.record(z.string(), TweenValueSchema).optional(),
   ease: z.string().optional(),
-  delay: z.number().optional(), // optional delay in progress scale
+  delay: z.number().optional(), 
+  
+  // Advanced Keyframes (New)
+  keyframes: z.array(KeyframeSchema).optional(),
 });
 // Using input to allow omitting optional properties in mock data
 export type AnimationConfigInput = z.input<typeof AnimationConfigSchema>;
@@ -47,6 +59,7 @@ export type LayerConfig = z.infer<typeof LayerConfigSchema>;
 
 // --- Scene Config ---
 export const SceneConfigSchema = z.object({
+  version: z.string().optional().default("1.0"),
   id: z.string(),
   order: z.number(),
   scrollDuration: z.string().optional().default("100vh"),

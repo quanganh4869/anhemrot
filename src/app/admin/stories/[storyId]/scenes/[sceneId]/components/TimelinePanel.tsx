@@ -37,15 +37,23 @@ export default function TimelinePanel({ scene, selectedLayerId }: TimelinePanelP
                  
                  {/* Timeline Track */}
                  <div className="flex-1 relative h-full border-l border-zinc-800">
-                    {layer.animations.map(anim => {
-                      const left = `${anim.startProgress * 100}%`;
-                      const width = `${(anim.endProgress - anim.startProgress) * 100}%`;
+                    {layer.animations?.map(anim => {
+                      let sProgress = anim.startProgress || 0;
+                      let eProgress = anim.endProgress || 1;
+                      if (anim.keyframes && anim.keyframes.length > 0) {
+                        const sorted = [...anim.keyframes].sort((a,b) => a.progress - b.progress);
+                        sProgress = sorted[0].progress;
+                        eProgress = sorted[sorted.length - 1].progress;
+                      }
+
+                      const left = `${sProgress * 100}%`;
+                      const width = `${(eProgress - sProgress) * 100}%`;
                       return (
                         <div 
                           key={anim.id}
                           className="absolute top-2 h-4 bg-emerald-500/80 rounded border border-emerald-400 text-[9px] text-white flex items-center px-1 overflow-hidden"
                           style={{ left, width }}
-                          title={`${anim.property} (${anim.startProgress} - ${anim.endProgress})`}
+                          title={`${anim.property} (${sProgress} - ${eProgress})`}
                         >
                           {anim.property}
                         </div>

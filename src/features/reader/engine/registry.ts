@@ -26,33 +26,70 @@ export const AnimationRegistry = new EngineRegistry();
 
 // --- Built-in Handlers ---
 
-const createTween = (config: AnimationConfig, sceneDurationMultiplier: number) => {
-  const duration = (config.endProgress - config.startProgress) * sceneDurationMultiplier;
-  const position = (config.startProgress + (config.delay || 0)) * sceneDurationMultiplier;
-  return { duration, position };
+const applyTweenOrKeyframes = (
+  tl: gsap.core.Timeline,
+  target: Element | string,
+  config: AnimationConfig,
+  propKey: string,
+  multiplier: number,
+  isFilter = false
+) => {
+  // Advanced Keyframes Mode
+  if (config.keyframes && config.keyframes.length > 0) {
+    const kfs = [...config.keyframes].sort((a, b) => a.progress - b.progress);
+    if (kfs.length < 2) return; // Need at least 2 keyframes to tween
+    
+    // Set initial state based on the first keyframe
+    const firstKf = kfs[0];
+    const initialPos = firstKf.progress * multiplier;
+    
+    // Convert value format
+    const formatVal = (v: any) => isFilter ? `blur(${v}px)` : v;
+    
+    tl.set(target, { [propKey]: formatVal(firstKf.values[propKey]) } as gsap.TweenVars, initialPos);
+    
+    // Chain remaining keyframes
+    let currentPos = initialPos;
+    for (let i = 1; i < kfs.length; i++) {
+      const kf = kfs[i];
+      const nextPos = kf.progress * multiplier;
+      const duration = nextPos - currentPos;
+      
+      tl.to(target, { 
+        [propKey]: formatVal(kf.values[propKey]), 
+        duration, 
+        ease: kf.ease || "none" 
+      } as gsap.TweenVars, currentPos);
+      
+      currentPos = nextPos;
+    }
+  } 
+  // Legacy 2-Point Mode
+  else if (config.startProgress !== undefined && config.endProgress !== undefined && config.from && config.to) {
+    const duration = (config.endProgress - config.startProgress) * multiplier;
+    const position = (config.startProgress + (config.delay || 0)) * multiplier;
+    
+    const formatVal = (v: any) => isFilter ? `blur(${v}px)` : v;
+    
+    tl.fromTo(target, 
+      { [propKey]: formatVal(config.from[propKey] ?? config.from.value) } as gsap.TweenVars, 
+      { [propKey]: formatVal(config.to[propKey] ?? config.to.value), duration, ease: config.ease || "none" } as gsap.TweenVars, 
+      position
+    );
+  }
 };
 
 // Fade (Opacity) Handler
 AnimationRegistry.register('opacity', {
   apply(tl, target, config, multiplier) {
-    const { duration, position } = createTween(config, multiplier);
-    tl.fromTo(target, 
-      { opacity: config.from.value ?? 0 } as gsap.TweenVars, 
-      { opacity: config.to.value ?? 1, duration, ease: config.ease || "none" } as gsap.TweenVars, 
-      position
-    );
+    applyTweenOrKeyframes(tl, target, config, 'opacity', multiplier);
   }
 });
 
 // Transform Handlers
 const buildTransformHandler = (propKey: string): AnimationHandler => ({
   apply(tl, target, config, multiplier) {
-    const { duration, position } = createTween(config, multiplier);
-    tl.fromTo(target, 
-      { [propKey]: config.from.value ?? 0 } as gsap.TweenVars, 
-      { [propKey]: config.to.value, duration, ease: config.ease || "none" } as gsap.TweenVars, 
-      position
-    );
+    applyTweenOrKeyframes(tl, target, config, propKey, multiplier);
   }
 });
 
@@ -64,47 +101,27 @@ AnimationRegistry.register('skew', buildTransformHandler('skew'));
 
 AnimationRegistry.register('translate', {
   apply(tl, target, config, multiplier) {
-    const { duration, position } = createTween(config, multiplier);
-    tl.fromTo(target,
-      { x: config.from.x ?? 0, y: config.from.y ?? 0 } as gsap.TweenVars,
-      { x: config.to.x, y: config.to.y, duration, ease: config.ease || "none" } as gsap.TweenVars,
-      position
-    );
+    applyTweenOrKeyframes(tl, target, config, 'x', multiplier);
+    applyTweenOrKeyframes(tl, target, config, 'y', multiplier);
   }
 });
 
 // Filter Handlers
 AnimationRegistry.register('blur', {
   apply(tl, target, config, multiplier) {
-    const { duration, position } = createTween(config, multiplier);
-    tl.fromTo(target,
-      { filter: `blur(${config.from.value ?? 0}px)` } as gsap.TweenVars,
-      { filter: `blur(${config.to.value}px)`, duration, ease: config.ease || "none" } as gsap.TweenVars,
-      position
-    );
+    applyTweenOrKeyframes(tl, target, config, 'filter', multiplier, true);
   }
 });
 
 // Semantic Handlers
 AnimationRegistry.register('camera_zoom', {
   apply(tl, target, config, multiplier) {
-    const { duration, position } = createTween(config, multiplier);
-    tl.fromTo(target,
-      { scale: config.from.scale ?? 1 } as gsap.TweenVars,
-      { scale: config.to.scale, duration, ease: config.ease || "none" } as gsap.TweenVars,
-      position
-    );
+    applyTweenOrKeyframes(tl, target, config, 'scale', multiplier);
   }
 });
 
 AnimationRegistry.register('parallax', {
   apply(tl, target, config, multiplier) {
-    const { duration, position } = createTween(config, multiplier);
-    // Simple vertical parallax
-    tl.fromTo(target,
-      { y: config.from.y ?? 0 } as gsap.TweenVars,
-      { y: config.to.y, duration, ease: config.ease || "none" } as gsap.TweenVars,
-      position
-    );
+    applyTweenOrKeyframes(tl, target, config, 'y', multiplier);
   }
 });
