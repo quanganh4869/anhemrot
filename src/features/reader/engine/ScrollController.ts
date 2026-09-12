@@ -17,7 +17,7 @@ export class ScrollController {
     return ScrollTrigger.create({
       animation: tl,
       trigger: containerEl,
-      start: "top 72px", // When top of scene reaches just below the sticky header
+      start: "top top", // Full viewport, pin exactly at the top
       end: `+=${sceneConfig.scrollDuration || '200vh'}`, 
       pin: sceneConfig.pin,
       pinSpacing: true,

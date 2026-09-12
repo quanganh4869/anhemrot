@@ -33,9 +33,13 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
   return (
     <div 
       ref={containerRef}
-      className="relative w-full aspect-[16/9] min-h-[460px] max-h-[75vh] overflow-hidden bg-black flex items-center justify-center"
+      className="relative w-full h-screen overflow-hidden bg-black flex items-center justify-center"
     >
-      <div className="relative w-full h-full overflow-hidden">
+      {/* 
+        True cinematic canvas: No borders, no artificial rounded corners. 
+        The scene takes up the viewport. The layers inside it handle their own dimensions.
+      */}
+      <div className="relative w-full h-full">
         {scene.layers.map((layer, i) => (
           <SceneLayer 
             key={layer.id} 
