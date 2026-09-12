@@ -66,20 +66,28 @@ export default function ScrollStoryReader({ config }: ScrollStoryReaderProps) {
       <div className="sticky top-0 w-full h-screen overflow-hidden bg-black">
         {/* We can use CSS variables to tie animation to scroll progress! */}
         <div 
-          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out flex items-center justify-center"
           style={{
-            // A simple way to map scroll to animation is to use a CSS variable 
-            // that the internal renderer or our override can use.
             '--scroll-progress': scrollProgress
           } as React.CSSProperties}
         >
-          {scenes[activeIndex] && (
-            <SceneRenderer 
-              scene={scenes[activeIndex]} 
-              isPlaying={true} 
-              className="w-full h-full"
-            />
-          )}
+          <div 
+            className="relative shadow-2xl ring-1 ring-zinc-800 rounded-lg overflow-hidden bg-zinc-950"
+            style={{
+              width: '100%',
+              maxWidth: 'calc(90vh * 16 / 9)', // Match the 90vh max height constraint
+              aspectRatio: '16/9',
+              maxHeight: '90vh' // Leave a little margin
+            }}
+          >
+            {scenes[activeIndex] && (
+              <SceneRenderer 
+                scene={scenes[activeIndex]} 
+                isPlaying={true} 
+                className="w-full h-full"
+              />
+            )}
+          </div>
         </div>
         
         {/* Progress bar */}
