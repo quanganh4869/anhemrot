@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save, Play, Layers, Settings, MonitorPlay, Undo2, Redo2 } from "lucide-react";
 import { SceneConfigSchema } from "@/features/reader/engine/schema";
@@ -13,7 +13,8 @@ import PropertiesPanel from "./components/PropertiesPanel";
 import TimelinePanel from "./components/TimelinePanel";
 import SceneRenderer from "@/features/reader/components/SceneRenderer";
 
-export default function VisualSceneEditorPage({ params }: { params: { storyId: string, sceneId: string } }) {
+export default function VisualSceneEditorPage(props: { params: Promise<{ storyId: string, sceneId: string }> }) {
+  const params = use(props.params);
   // Load mock data for the scene and parse it to populate defaults (strict type)
   const initialScene = SceneConfigSchema.parse(mockStoryData.chapters[0].scenes[0]);
   

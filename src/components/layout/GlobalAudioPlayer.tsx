@@ -57,7 +57,7 @@ export default function GlobalAudioPlayer() {
       {/* Background Audio Element */}
       <audio
         ref={audioRef}
-        src="/audio/OpeningAnimee.mp3"
+        src="/audio/OpeningAnimee.wav"
         loop
         preload="auto"
       />

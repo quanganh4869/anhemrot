@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
-export default function StoryDetailPage({ params }: { params: { storyId: string } }) {
+export default function StoryDetailPage(props: { params: Promise<{ storyId: string }> }) {
+  const params = use(props.params);
   const { language } = useLanguage();
 
   const story = {
