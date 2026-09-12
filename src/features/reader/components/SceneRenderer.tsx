@@ -5,11 +5,14 @@ import SceneLayer from "./SceneLayer";
 import { AnimationController } from "../engine/AnimationController";
 import { ScrollController } from "../engine/ScrollController";
 
+import { cn } from "@/lib/utils";
+
 interface SceneRendererProps {
   scene: SceneConfig;
+  isFocusMode?: boolean;
 }
 
-export default function SceneRenderer({ scene }: SceneRendererProps) {
+export default function SceneRenderer({ scene, isFocusMode = false }: SceneRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const layersRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -26,19 +29,20 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
     const tl = AnimationController.createTimeline(parsedScene, layersRef.current, isReducedMotion);
 
     // Attach to scroll via separated controller
-    ScrollController.attach(tl, containerRef.current, parsedScene);
+    ScrollController.attach(tl, containerRef.current, parsedScene, isFocusMode ? 0 : 72);
 
-  }, { scope: containerRef, dependencies: [scene] });
+  }, { scope: containerRef, dependencies: [scene, isFocusMode] });
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden bg-black flex items-center justify-center"
+      className={cn(
+        "relative overflow-hidden bg-black flex items-center justify-center select-none",
+        isFocusMode 
+          ? "w-full h-screen" 
+          : "w-full aspect-[16/9] min-h-[440px] max-h-[80vh] rounded-sm"
+      )}
     >
-      {/* 
-        True cinematic canvas: No borders, no artificial rounded corners. 
-        The scene takes up the viewport. The layers inside it handle their own dimensions.
-      */}
       <div className="relative w-full h-full">
         {scene.layers.map((layer, i) => (
           <SceneLayer 

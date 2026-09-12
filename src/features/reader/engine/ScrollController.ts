@@ -11,13 +11,14 @@ export class ScrollController {
   static attach(
     tl: gsap.core.Timeline, 
     containerEl: Element, 
-    sceneConfig: SceneConfig
+    sceneConfig: SceneConfig,
+    offset: number = 72
   ): ScrollTrigger {
     
     return ScrollTrigger.create({
       animation: tl,
       trigger: containerEl,
-      start: "top top", // Full viewport, pin exactly at the top
+      start: offset > 0 ? `top ${offset}px` : "top top",
       end: `+=${sceneConfig.scrollDuration || '200vh'}`, 
       pin: sceneConfig.pin,
       pinSpacing: true,
