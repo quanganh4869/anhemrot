@@ -43,7 +43,7 @@ export default function VisualSceneEditorPage({ params }: { params: { storyId: s
           <span className="text-sm font-medium">Preview Mode</span>
           <button 
             onClick={() => setIsPreviewMode(false)}
-            className="bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded text-sm transition"
+            className="bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 text-sm transition"
           >
             Exit Preview
           </button>
@@ -96,14 +96,14 @@ export default function VisualSceneEditorPage({ params }: { params: { storyId: s
           </span>
           <button 
             onClick={() => setIsPreviewMode(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded transition"
+            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 transition"
           >
             <MonitorPlay className="w-4 h-4" />
             Preview
           </button>
           <button 
             onClick={handleSaveDraft}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white text-black hover:bg-zinc-200 rounded font-medium transition"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white text-black hover:bg-zinc-200 font-medium transition"
           >
             <Save className="w-4 h-4" />
             Save Draft

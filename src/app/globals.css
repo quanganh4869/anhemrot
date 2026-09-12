@@ -2,43 +2,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  --background: #f8fafc;
-  --foreground: #1e293b;
-  --twilight: #0f172a;
-  --firefly-light: #fef08a;
-  --firefly-glow: #fde047;
-  --accent: #38bdf8;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-twilight: var(--twilight);
-  --color-firefly-light: var(--firefly-light);
-  --color-firefly-glow: var(--firefly-glow);
-  --color-accent: var(--accent);
-  
-  --font-sans: var(--font-nunito), Arial, Helvetica, sans-serif;
-  --font-display: var(--font-fredoka), system-ui, sans-serif;
-}
-
-.dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: var(--font-sans);
+  background-color: #09090b; /* zinc-950 */
+  color: #f4f4f5; /* zinc-100 */
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-@keyframes kenburns {
-  0% { transform: scale(1) translate(0, 0); }
-  100% { transform: scale(1.1) translate(-1%, -1%); }
+/* Remove scrollbar for immersion but keep scrollability */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
 }

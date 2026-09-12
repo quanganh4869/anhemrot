@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Fredoka, Nunito } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import AuthProvider from "@/features/auth/components/AuthProvider";
 import "./globals.css";
 
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const nunito = Nunito({
-  variable: "--font-nunito",
+const playfair = Playfair_Display({
+  variable: "--font-serif",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "How Firefly Got His Light | Stories for Kids",
-  description: "A whimsical children's story about a little firefly.",
+  title: "Interactive Web Comic",
+  description: "A cinematic storytelling platform.",
 };
 
 import GlobalAudioPlayer from "@/components/layout/GlobalAudioPlayer";
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fredoka.variable} ${nunito.variable} antialiased font-sans`}
+        className={`${inter.variable} ${playfair.variable} antialiased font-sans bg-zinc-950 text-zinc-100`}
       >
         <ThemeProvider>
           <LanguageProvider>

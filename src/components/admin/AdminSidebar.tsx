@@ -13,10 +13,10 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Workspace", href: "/admin", icon: LayoutDashboard },
   { name: "Stories", href: "/admin/stories", icon: BookOpen },
   { name: "Assets", href: "/admin/assets", icon: ImageIcon },
-  { name: "Categories & Tags", href: "/admin/categories", icon: Tags },
+  { name: "Categories", href: "/admin/categories", icon: Tags },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
@@ -25,12 +25,12 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-zinc-950 border-r border-zinc-800 h-screen flex flex-col sticky top-0 text-zinc-300">
-      <div className="h-16 flex items-center px-6 border-b border-zinc-800">
-        <span className="font-bold text-lg text-white tracking-tight">StoryAdmin</span>
+    <aside className="w-64 bg-zinc-950 border-r border-zinc-900 h-screen flex flex-col sticky top-0 text-zinc-400 font-sans">
+      <div className="h-14 flex items-center px-6 border-b border-zinc-900">
+        <span className="font-bold text-sm text-zinc-100 uppercase tracking-widest">StoryAdmin</span>
       </div>
 
-      <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 py-4 flex flex-col overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
@@ -38,22 +38,22 @@ export default function AdminSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-6 py-2 text-sm font-medium transition-colors border-l-2",
                 isActive 
-                  ? "bg-zinc-800 text-white" 
-                  : "hover:bg-zinc-900 hover:text-white"
+                  ? "border-zinc-100 bg-zinc-900/50 text-zinc-100" 
+                  : "border-transparent hover:text-zinc-200"
               )}
             >
-              <item.icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-zinc-500")} />
+              <item.icon className={cn("w-4 h-4", isActive ? "text-zinc-100" : "text-zinc-500")} />
               {item.name}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-zinc-800">
-        <button className="flex items-center gap-3 px-3 py-2.5 w-full text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-md transition-colors">
-          <LogOut className="w-5 h-5" />
+      <div className="border-t border-zinc-900 p-2">
+        <button className="flex items-center gap-3 px-4 py-2 w-full text-sm font-medium text-zinc-500 hover:text-zinc-200 transition-colors">
+          <LogOut className="w-4 h-4" />
           Logout
         </button>
       </div>
