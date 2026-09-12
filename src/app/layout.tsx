@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "A whimsical children's story about a little firefly.",
 };
 
+import GlobalAudioPlayer from "@/components/layout/GlobalAudioPlayer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +34,7 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             {children}
+            <GlobalAudioPlayer />
           </LanguageProvider>
         </ThemeProvider>
       </body>
