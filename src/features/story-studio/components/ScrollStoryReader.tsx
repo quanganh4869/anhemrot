@@ -63,10 +63,23 @@ export default function ScrollStoryReader({ config }: ScrollStoryReaderProps) {
       className="relative w-full bg-black"
       style={{ height: `${scenes.length * 150}vh` }} // Each scene takes 1.5 screen heights to scroll through
     >
-      <div className="sticky top-0 w-full h-screen overflow-hidden bg-black">
+      <div className="sticky top-0 w-full h-screen overflow-hidden bg-zinc-950 flex flex-col justify-center">
+        
+        {/* Ambient Blurred Background Layer */}
+        {scenes[activeIndex] && scenes[activeIndex].background.url && (
+          <div 
+            className="absolute inset-0 z-0 opacity-40 blur-3xl scale-110 transition-all duration-1000 ease-in-out"
+            style={{
+              backgroundImage: `url(${scenes[activeIndex].background.url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
+        )}
+        
         {/* We can use CSS variables to tie animation to scroll progress! */}
         <div 
-          className="absolute inset-0 transition-opacity duration-700 ease-in-out flex items-center justify-center"
+          className="absolute inset-0 z-10 transition-opacity duration-700 ease-in-out flex items-center justify-center"
           style={{
             '--scroll-progress': scrollProgress
           } as React.CSSProperties}
