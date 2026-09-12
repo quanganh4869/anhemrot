@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function Home() {
@@ -33,18 +35,7 @@ export default function Home() {
 
   return (
     <div className="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans">
-      
-      {/* Minimal Nav */}
-      <nav className="w-full px-6 py-8 flex justify-between items-center max-w-7xl mx-auto">
-        <Link href="/" className="font-serif text-2xl font-bold tracking-tight">
-          S.
-        </Link>
-        <div className="flex gap-6 text-sm font-medium text-zinc-400">
-          <Link href="/" className="text-zinc-100">Library</Link>
-          <Link href="/admin/stories" className="hover:text-zinc-100 transition-colors">Admin</Link>
-          <Link href="/login" className="hover:text-zinc-100 transition-colors">Login</Link>
-        </div>
-      </nav>
+      <Header />
 
       <main className="w-full flex-grow flex flex-col max-w-7xl mx-auto px-6 pb-24">
         
@@ -109,6 +100,8 @@ export default function Home() {
         </section>
 
       </main>
+
+      <Footer />
     </div>
   );
 }

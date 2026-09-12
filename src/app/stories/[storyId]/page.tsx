@@ -40,7 +40,7 @@ export default function StoryDetailPage() {
         <div className="w-full lg:w-[400px] shrink-0">
           <div className="w-full aspect-[3/4] bg-zinc-900 sticky top-12">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={story.coverUrl} alt="Cover" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+            <img src={story.coverUrl} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
           </div>
         </div>
 
