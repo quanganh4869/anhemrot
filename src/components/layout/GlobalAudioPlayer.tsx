@@ -18,7 +18,7 @@ export default function GlobalAudioPlayer() {
         setHasInteracted(true);
         audio.play()
           .then(() => setIsPlaying(true))
-          .catch((err) => console.error("Audio autoplay failed:", err));
+          .catch(() => { /* silent catch */ });
       }
     };
 
@@ -42,7 +42,7 @@ export default function GlobalAudioPlayer() {
       } else {
         audioRef.current.play()
           .then(() => setIsPlaying(true))
-          .catch(console.error);
+          .catch(() => { /* silent catch */ });
       }
     }
   };

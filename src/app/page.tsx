@@ -79,6 +79,60 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Story Grid Section */}
+        <section className="w-full max-w-5xl mx-auto px-6 py-12 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold font-fredoka text-zinc-900 dark:text-white">
+              {language === "en" ? "More Stories" : "Khám phá thêm truyện"}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* Story 1 (The main one) */}
+            <Link href="/stories/nightmare-dream" className="group flex flex-col gap-3">
+              <div className="relative aspect-video rounded-xl overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-lg">
+                <img src="/images/story/scene_02_title.webp" alt="Nightmare Dream" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300" />
+                <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <Play className="w-3 h-3 fill-current" /> Interactive
+                </div>
+              </div>
+              <div>
+                <h3 className="font-bold text-zinc-900 dark:text-white line-clamp-1 group-hover:text-primary transition-colors">
+                  {language === "en" ? "A Nightmare That Wanted To Become A Beautiful Dream" : "Có Một Ác Mộng Muốn Trở Thành Một Giấc Mơ Đẹp"}
+                </h3>
+                <p className="text-sm text-zinc-500">San Anh & Mr. Ngài</p>
+              </div>
+            </Link>
+
+            {/* Story 2 (Dummy) */}
+            <Link href="#" className="group flex flex-col gap-3 opacity-60 hover:opacity-100 transition-opacity">
+              <div className="relative aspect-video rounded-xl overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-lg bg-zinc-100 dark:bg-zinc-900">
+                <img src="/images/hero_firefly.png" alt="Firefly" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              </div>
+              <div>
+                <h3 className="font-bold text-zinc-900 dark:text-white line-clamp-1 group-hover:text-primary transition-colors">
+                  {language === "en" ? "How Firefly Got His Light" : "Chú Đom Đóm Tìm Lại Ánh Sáng"}
+                </h3>
+                <p className="text-sm text-zinc-500">Daniel Errico</p>
+              </div>
+            </Link>
+
+            {/* Story 3 (Coming Soon) */}
+            <div className="group flex flex-col gap-3 opacity-40 cursor-not-allowed">
+              <div className="relative aspect-video rounded-xl overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-800 border-dashed border-2 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/50">
+                <span className="text-zinc-400 font-medium">Coming Soon</span>
+              </div>
+              <div>
+                <div className="h-5 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mb-2" />
+                <div className="h-4 w-1/2 bg-zinc-100 dark:bg-zinc-800/50 rounded animate-pulse" />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
       </main>
       <Footer />
     </div>

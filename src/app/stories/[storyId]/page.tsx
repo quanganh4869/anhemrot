@@ -2,7 +2,8 @@
 
 import React, { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import ScrollStoryReader from "@/features/story-studio/components/ScrollStoryReader";
 import { ChapterAnimConfig, Scene, AnimationPresetType } from "@/types/story-anim";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -115,22 +116,12 @@ export default function StoryReaderPage() {
   }, [language]);
 
   return (
-    <div className="bg-zinc-950 text-white min-h-screen relative">
-      {/* Floating Back Button */}
-      <div className="fixed top-6 left-6 z-50">
-        <button 
-          onClick={() => router.push('/')}
-          className="w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-lg ring-1 ring-white/20"
-          title="Về trang chủ"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-      </div>
-
-      <main className="w-full h-full">
-        {/* We use ScrollStoryReader which will auto-scale to 16:9 while fitting the screen */}
+    <div className="bg-zinc-950 text-white min-h-screen flex flex-col">
+      <Header />
+      <main className="w-full flex-grow relative">
         <ScrollStoryReader config={mockAnimatedStory} />
       </main>
+      <Footer />
     </div>
   );
 }
