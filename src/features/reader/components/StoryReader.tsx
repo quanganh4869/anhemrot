@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StoryConfig } from "../types";
 import ChapterReader from "./ChapterReader";
+import CinematicIntro from "./ui/CinematicIntro";
+import ReadingProgress from "./ui/ReadingProgress";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -10,17 +12,29 @@ interface StoryReaderProps {
 
 export default function StoryReader({ story }: StoryReaderProps) {
   const router = useRouter();
-  
-  // For now, we just render the first chapter
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Simulate asset preloading check
+    // In a real app, this would wait for fonts and first scene images to load
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const currentChapter = story.chapters[0];
 
   return (
-    <div className="relative w-full bg-zinc-950 min-h-screen">
+    <div className="w-full bg-black min-h-screen text-white font-sans overflow-x-hidden selection:bg-white/30 relative">
+      <CinematicIntro title={story.title} isReady={isReady} />
+      <ReadingProgress />
+
       {/* Minimalist UI Controls */}
-      <div className="fixed top-4 left-4 z-50">
+      <div className="fixed top-4 left-4 z-[9000]">
         <button 
-          onClick={() => router.push('/')}
-          className="w-10 h-10 bg-black/20 hover:bg-black/50 backdrop-blur rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all ring-1 ring-white/10"
+          onClick={() => router.back()}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-black/70 transition-all"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>

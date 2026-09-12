@@ -8,7 +8,7 @@ interface ChapterReaderProps {
 
 export default function ChapterReader({ chapter }: ChapterReaderProps) {
   return (
-    <div className="w-full flex flex-col bg-zinc-950">
+    <div className="w-full flex flex-col items-center bg-black">
       {chapter.scenes.map((scene) => (
         <SceneRenderer key={scene.id} scene={scene} />
       ))}

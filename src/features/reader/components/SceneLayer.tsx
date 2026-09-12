@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import { LayerConfig } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +7,7 @@ interface SceneLayerProps {
 }
 
 const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(({ layer }, ref) => {
+  const [isLoaded, setIsLoaded] = useState(false);
   
   // Base styling ensuring performance
   const style: React.CSSProperties = {
@@ -28,9 +29,20 @@ const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(({ layer }, ref) 
       case 'foreground':
       case 'effect':
         if (layer.assetUrl) {
-          // Note: using img tag for now. In prod, we'd use Next/Image with proper sizing.
-          // eslint-disable-next-line @next/next/no-img-element
-          return <img src={layer.assetUrl} alt={layer.type} className="w-full h-full object-cover" />;
+          return (
+            <div className="w-full h-full relative">
+              {!isLoaded && (
+                <div className="absolute inset-0 bg-zinc-900/50 animate-pulse rounded-md blur-sm backdrop-blur-xl" />
+              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={layer.assetUrl} 
+                alt={layer.type} 
+                onLoad={() => setIsLoaded(true)}
+                className={cn("w-full h-full object-cover transition-opacity duration-700", isLoaded ? "opacity-100" : "opacity-0")}
+              />
+            </div>
+          );
         }
         return null;
       case 'dialogue':
@@ -52,8 +64,14 @@ const SceneLayer = forwardRef<HTMLDivElement, SceneLayerProps>(({ layer }, ref) 
   };
 
   return (
-    <div ref={ref} style={style} className={cn("pointer-events-none", layer.className)}>
-      {renderContent()}
+    <div 
+      ref={ref} 
+      style={style} 
+      className={cn(
+        "absolute will-change-transform pointer-events-none",
+        layer.className
+      )}
+    >  {renderContent()}
     </div>
   );
 });

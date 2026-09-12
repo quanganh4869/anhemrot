@@ -25,6 +25,10 @@ export default function SceneRenderer({ scene }: SceneRendererProps) {
     // Build timeline via separated controller
     const tl = AnimationController.createTimeline(parsedScene, layersRef.current, isReducedMotion);
     
+    // Add scene-level fade out (crossfade transition) at the very end (90% to 100%)
+    // Since SCENE_DURATION_MULTIPLIER = 1, we can add it to the timeline
+    tl.to(containerRef.current, { opacity: 0, duration: 0.1 }, 0.9);
+
     // Attach to scroll via separated controller
     ScrollController.attach(tl, containerRef.current, parsedScene);
 
