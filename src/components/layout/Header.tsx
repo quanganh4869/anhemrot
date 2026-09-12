@@ -1,11 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Globe } from "lucide-react";
+import { Globe, Sun, Moon } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const { language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md text-zinc-100 font-sans">
@@ -39,6 +47,16 @@ export default function Header() {
             <Globe size={14} />
             <span>{language.toUpperCase()}</span>
           </button>
+
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-1.5 rounded border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+          )}
 
           <Link 
             href="/login"
