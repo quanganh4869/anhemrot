@@ -1,44 +1,43 @@
 import { useRef } from 'react';
-import type { RefObject } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import type { StoryScene } from '../../data/stories';
-import CinematicArtwork from './CinematicArtwork';
 
 interface Props {
   scene: StoryScene;
   index: number;
-  total: number;
-  containerRef: RefObject<HTMLDivElement | null>;
 }
 
-export default function StoryPage({ scene, index, containerRef }: Props) {
+export default function StoryPage({ scene, index }: Props) {
   const pageRef = useRef<HTMLDivElement>(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: pageRef,
-    container: containerRef,
     offset: ["start end", "end start"]
   });
 
+  const isTextHeavy = scene.text.length > 0;
+  const hasImage = !!scene.visual.mainImage;
+  const isImageDominant = hasImage && !isTextHeavy;
+  const isHybrid = hasImage && isTextHeavy;
 
-
-  // Text Animation (Slides up faster, fades in later)
-  const textOpacity = useTransform(scrollYProgress, (v) => {
-    if (v < 0.25) return 0;
-    if (v >= 0.25 && v < 0.45) return (v - 0.25) / 0.2;
-    if (v >= 0.45 && v < 0.55) return 1;
-    if (v >= 0.55 && v < 0.75) return 1 - ((v - 0.55) / 0.2);
+  // Tasteful image-level motion: subtle parallax and scale
+  // Using direct mapping, avoiding Framer WAAPI bugs by providing continuous ranges
+  const imageY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.02, 1.12, 1.02]);
+  
+  // Page level opacity for smooth transitions between pages without fade-to-white
+  // The opacity fades out precisely as the global background color interpolates,
+  // creating a seamless transition.
+  const pageOpacity = useTransform(scrollYProgress, (v) => {
+    if (v < 0.15) return 0;
+    if (v >= 0.15 && v < 0.35) return (v - 0.15) / 0.2;
+    if (v >= 0.35 && v < 0.65) return 1;
+    if (v >= 0.65 && v < 0.85) return 1 - ((v - 0.65) / 0.2);
     return 0;
   });
 
-  const textY = useTransform(scrollYProgress, (v) => {
-    if (v < 0.25) return 80;
-    if (v >= 0.25 && v < 0.5) return 80 - ((v - 0.25) / 0.25) * 80;
-    if (v >= 0.5 && v < 0.75) return 0 - ((v - 0.5) / 0.25) * 80;
-    return -80;
-  });
-
-  const isTextHeavy = scene.text.length > 0;
+  // Text slides up subtly as you scroll
+  const textY = useTransform(scrollYProgress, [0, 0.5, 1], [50, 0, -50]);
 
   return (
     <div 
@@ -46,25 +45,32 @@ export default function StoryPage({ scene, index, containerRef }: Props) {
       className="relative w-full h-[100svh] min-h-[100svh] snap-start flex items-center justify-center overflow-hidden"
       id={`page-${index + 1}`}
     >
-      <div 
-        className="w-full h-full flex flex-col md:flex-row items-center justify-center relative max-w-6xl mx-auto"
+      <motion.div 
+        className="w-full h-full flex flex-col md:flex-row items-center justify-center relative max-w-[1400px] mx-auto"
+        style={{ opacity: pageOpacity }}
       >
         {/* Artwork Layer */}
-        {scene.visual.mainImage && (
-          <div 
-            className={`${isTextHeavy ? 'relative w-full h-[40vh] md:w-1/2 md:h-[80vh] shrink-0' : 'absolute inset-0 z-0'} flex items-center justify-center pointer-events-none`}
+        {hasImage && (
+          <motion.div 
+            className={`${isHybrid ? 'relative w-full h-[50vh] md:w-1/2 md:h-full shrink-0' : 'absolute inset-0 z-0'} flex items-center justify-center pointer-events-none`}
+            style={{ y: imageY, scale: imageScale }}
           >
-            <CinematicArtwork scene={scene} scrollYProgress={scrollYProgress} index={index} />
-          </div>
+            <img 
+              src={`/images/${scene.visual.mainImage}`} 
+              alt={`Illustration for page ${index + 1}`}
+              className={`w-full h-full ${isImageDominant ? 'object-cover' : 'object-contain p-6 md:p-12'}`}
+              loading={index < 3 ? "eager" : "lazy"}
+            />
+          </motion.div>
         )}
 
         {/* Text Layer */}
         {isTextHeavy && (
           <motion.div 
-            className={`relative z-10 w-full flex flex-col gap-6 px-6 ${scene.visual.mainImage ? 'md:w-1/2 py-4' : 'max-w-2xl mx-auto'}`}
-            style={{ opacity: textOpacity, y: textY }}
+            className={`relative z-10 w-full flex flex-col gap-6 px-6 ${isHybrid ? 'md:w-1/2 py-8' : 'max-w-2xl mx-auto'}`}
+            style={{ y: textY }}
           >
-            <div className={`${scene.visual.backgroundTone === '#ffffff' && !scene.visual.mainImage ? '' : 'bg-white/90 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-2xl border border-white/50'} text-slate-800`}>
+            <div className="text-slate-800">
               {scene.text.map((paragraph, pIndex) => (
                 <p 
                   key={pIndex} 
@@ -84,7 +90,7 @@ export default function StoryPage({ scene, index, containerRef }: Props) {
             </div>
           </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

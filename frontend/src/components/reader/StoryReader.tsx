@@ -81,8 +81,6 @@ export default function StoryReader() {
               key={scene.id} 
               scene={scene} 
               index={index} 
-              total={story.scenes.length}
-              containerRef={containerRef}
             />
           ))}
         </div>
