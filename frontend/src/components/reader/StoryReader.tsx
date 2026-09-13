@@ -77,10 +77,11 @@ export default function StoryReader() {
       >
         <div className="relative w-full flex flex-col">
           {story.scenes.map((scene, index) => (
-            <StoryPage 
-              key={scene.id} 
-              scene={scene} 
-              index={index} 
+            <StoryPage
+              key={scene.id}
+              scene={scene}
+              index={index}
+              containerRef={containerRef}
             />
           ))}
         </div>
