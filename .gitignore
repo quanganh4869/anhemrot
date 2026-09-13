@@ -1,0 +1,6 @@
+﻿node_modules/
+demo.mp4
+*.zip
+*.odp
+frontend/dist/
+.env*
