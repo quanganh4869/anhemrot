@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { SlideScene } from '../data/slidesData';
-import { CloudCallout } from './CloudCallout';
 
 interface MorphStageProps {
   slides: SlideScene[];
@@ -57,6 +56,39 @@ function easeInOutCubic(x: number): number {
 }
 
 export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
+  const [viewport, setViewport] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+    height: typeof window !== 'undefined' ? window.innerHeight : 1080,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
+
+  // Compute Fullscreen Responsive Scale factor to eliminate all black bars
+  const scale = useMemo(() => {
+    const { width, height } = viewport;
+    const isPortrait = height > width && width < 768;
+
+    if (isPortrait) {
+      // In mobile portrait, scale to fit content comfortably with slight zoom
+      const scaleW = width / 1920;
+      const scaleH = height / 1080;
+      return Math.max(scaleW * 1.7, scaleH * 0.75);
+    }
+
+    // In desktop / landscape / tablet, cover the entire screen (100% full screen, zero borders)
+    return Math.max(width / 1920, height / 1080);
+  }, [viewport]);
+
   const total = slides.length;
   const clampedProgress = Math.max(0, Math.min(total - 1, progress));
   const slideAIdx = Math.min(Math.floor(clampedProgress), total - 2);
@@ -95,16 +127,16 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       }
 
       // Priority 2: same media
-      if (matchIdx === -1 && eA.type === 'image' && eA.media) {
+      if (matchIdx === -1 && eA.media) {
         for (let i = 0; i < elemsB.length; i++) {
-          if (!matchedBIndices.has(i) && elemsB[i].type === 'image' && elemsB[i].media === eA.media) {
+          if (!matchedBIndices.has(i) && elemsB[i].media === eA.media) {
             matchIdx = i;
             break;
           }
         }
       }
 
-      // Priority 3: both are thought bubbles
+      // Priority 3: both are bubbles
       if (matchIdx === -1 && eA.role === 'bubble') {
         for (let i = 0; i < elemsB.length; i++) {
           if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble') {
@@ -145,7 +177,7 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
           type: eA.type,
           role: eA.role,
           name: eA.name,
-          media: eA.media || eB.media,
+          media: isA ? eA.media : eB.media,
           left,
           top,
           width,
@@ -212,7 +244,6 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       }
     }
 
-    // Sort by zIndex to preserve layer stack
     return result.sort((a, b) => a.zIndex - b.zIndex);
   }, [slideA, slideB, t]);
 
@@ -221,8 +252,19 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       className="fixed inset-0 w-screen h-screen overflow-hidden flex items-center justify-center select-none"
       style={{ backgroundColor: currentBgColor }}
     >
-      {/* 16:9 Presentation Stage - Seamlessly fits full viewport without card framing */}
-      <div className="relative w-full h-full max-w-[177.78vh] max-h-[56.25vw] aspect-[16/9] overflow-hidden mx-auto">
+      {/* 1920x1080 Stage perfectly scaled to cover full screen with zero black bars */}
+      <div
+        className="absolute overflow-hidden"
+        style={{
+          width: '1920px',
+          height: '1080px',
+          left: '50%',
+          top: '50%',
+          transform: `translate(-50%, -50%) scale(${scale})`,
+          transformOrigin: 'center center',
+          willChange: 'transform',
+        }}
+      >
         {renderElements.map((el) => (
           <RenderElementItem key={el.key} element={el} />
         ))}
@@ -232,10 +274,10 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
 };
 
 const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) => {
-  const { type, role, media, left, top, width, height, rotation, opacity, zIndex, fill, text, textOpacity = 1, slideNumber } = element;
+  const { role, media, left, top, width, height, rotation, opacity, zIndex, fill, text, textOpacity = 1 } = element;
 
-  // Render Image Element
-  if (type === 'image' && media) {
+  // Render Image Element or Cloud Callout or Banner
+  if (media) {
     const isSvg = media.endsWith('.svg');
     const isDecoration = role === 'decoration' || isSvg;
 
@@ -248,7 +290,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           width: `${width}%`,
           height: `${height}%`,
           zIndex,
-          opacity,
+          opacity: opacity * textOpacity,
           transform: rotation ? `rotate(${rotation}deg)` : undefined,
           willChange: 'transform, opacity, left, top',
         }}
@@ -257,48 +299,13 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           src={`/media/${media}`}
           alt=""
           loading="eager"
-          className={`w-full h-full ${isDecoration ? 'animate-float-gentle' : ''}`}
+          className={`w-full h-full object-contain ${isDecoration ? 'animate-float-gentle' : ''}`}
         />
       </div>
     );
   }
 
-  // Render Thought Bubble using exact SVG Cloud Callout
-  if (role === 'bubble' && text && text.length > 0) {
-    let theme: 'gradient' | 'navy' | 'white' = 'gradient';
-    let tailSide: 'left' | 'right' = 'right';
-
-    if (slideNumber >= 23 && slideNumber <= 29) {
-      theme = 'white';
-      tailSide = 'right';
-    } else if (slideNumber >= 16 && slideNumber <= 22) {
-      theme = 'navy';
-      tailSide = slideNumber >= 18 ? 'left' : 'right';
-    } else {
-      theme = 'gradient';
-      tailSide = 'right';
-    }
-
-    return (
-      <div
-        className="absolute pointer-events-none flex items-center justify-center"
-        style={{
-          left: `${left}%`,
-          top: `${top}%`,
-          width: `${width}%`,
-          height: `${height}%`,
-          zIndex,
-          opacity: opacity * textOpacity,
-          transform: rotation ? `rotate(${rotation}deg)` : undefined,
-          willChange: 'transform, opacity, left, top',
-        }}
-      >
-        <CloudCallout texts={text} theme={theme} tailSide={tailSide} />
-      </div>
-    );
-  }
-
-  // Render Caption / Banner / Plain Textbox
+  // Fallback for Plain Textbox if media is not set
   if (text && text.length > 0) {
     const isBanner = element.name.includes('Scroll') || fill === '#ED0081';
     const isCry = text.some((t) => t.includes('OE'));
@@ -320,10 +327,10 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
         <div
           className={`flex flex-col items-center justify-center w-full ${
             isBanner
-              ? 'bg-gradient-to-r from-[#FF007A] to-[#ED0081] text-white px-5 py-2 rounded-2xl font-black tracking-widest text-xs sm:text-sm md:text-lg shadow-md uppercase border-2 border-white/60'
+              ? 'bg-gradient-to-r from-[#FF007A] to-[#ED0081] text-white px-5 py-2 rounded-2xl font-black tracking-widest text-lg shadow-md uppercase border-2 border-white/60'
               : isCry
-              ? 'text-[#ED0081] font-black tracking-widest text-base sm:text-xl md:text-3xl animate-bounce'
-              : 'text-slate-800 dark:text-white font-medium text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl'
+              ? 'text-[#ED0081] font-black tracking-widest text-3xl animate-bounce'
+              : 'text-slate-800 dark:text-white font-medium text-xl'
           }`}
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
