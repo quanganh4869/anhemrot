@@ -5,6 +5,8 @@ demo.mp4
 *.odp
 *.pptx
 component/
+pptx_extracted/
+Mr.Ngai.png
 frontend/dist/
 .env*
 .vercel
