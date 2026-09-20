@@ -2,20 +2,68 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { storySlides } from './data/slidesData';
 import { MorphStage } from './components/MorphStage';
 import { ScrollProgress } from './components/ScrollProgress';
-import { Maximize2, Minimize2, Play, Pause } from 'lucide-react';
+import { Maximize2, Minimize2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
 export const StoryApp: React.FC = () => {
   const [progress, setProgress] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
 
   const targetProgressRef = useRef<number>(0);
   const currentProgressRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
   const autoPlayTimerRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const userInteractedRef = useRef<boolean>(false);
 
   const totalSlides = storySlides.length; // 31
   const maxProgress = totalSlides - 1; // 30
+
+  // Music toggle function
+  const toggleAudio = useCallback(() => {
+    if (!audioRef.current) return;
+    userInteractedRef.current = true;
+
+    if (audioRef.current.paused) {
+      audioRef.current.play().then(() => {
+        setIsAudioPlaying(true);
+      }).catch((err) => {
+        console.warn('Audio play prevented:', err);
+      });
+    } else {
+      audioRef.current.pause();
+      setIsAudioPlaying(false);
+    }
+  }, []);
+
+  // Try auto-starting music on first user interaction (click or scroll)
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!userInteractedRef.current && audioRef.current) {
+        userInteractedRef.current = true;
+        audioRef.current.volume = 0.7;
+        audioRef.current.play().then(() => {
+          setIsAudioPlaying(true);
+        }).catch(() => {
+          // Autoplay blocked by browser until user explicitly clicks
+        });
+      }
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+      window.removeEventListener('wheel', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+
+    window.addEventListener('pointerdown', handleFirstInteraction, { passive: true });
+    window.addEventListener('wheel', handleFirstInteraction, { passive: true });
+    window.addEventListener('keydown', handleFirstInteraction, { passive: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+      window.removeEventListener('wheel', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, []);
 
   // Smooth lerp loop for 60fps/120fps fluid motion
   useEffect(() => {
@@ -26,7 +74,6 @@ export const StoryApp: React.FC = () => {
 
       const diff = targetProgressRef.current - currentProgressRef.current;
       if (Math.abs(diff) > 0.0005) {
-        // Smooth ease-out follow
         currentProgressRef.current += diff * 0.12;
         setProgress(currentProgressRef.current);
       }
@@ -62,6 +109,11 @@ export const StoryApp: React.FC = () => {
     if (!isPlaying) {
       if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
       return;
+    }
+
+    // When autoplay starts, also start music if not playing
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current.play().then(() => setIsAudioPlaying(true)).catch(() => {});
     }
 
     const interval = window.setInterval(() => {
@@ -133,11 +185,35 @@ export const StoryApp: React.FC = () => {
 
   return (
     <div className="relative w-full bg-black text-white selection:bg-[#ED0081]/40">
+      {/* Background Audio Soundtrack */}
+      <audio
+        ref={audioRef}
+        src="/media/soundtrack.wav"
+        loop
+        preload="auto"
+        onPlay={() => setIsAudioPlaying(true)}
+        onPause={() => setIsAudioPlaying(false)}
+      />
+
       {/* Pinned Presentation Stage with Morph Transitions */}
       <MorphStage slides={storySlides} progress={progress} />
 
       {/* Top Floating Controls (Subtle & Non-Intrusive) */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        {/* Music Audio Toggle Button */}
+        <button
+          onClick={toggleAudio}
+          aria-label={isAudioPlaying ? 'Tắt nhạc' : 'Bật nhạc'}
+          title={isAudioPlaying ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
+          className={`p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
+            isAudioPlaying
+              ? 'bg-[#ED0081] text-white border-white/30 shadow-[0_0_15px_rgba(237,0,129,0.5)] scale-105'
+              : 'bg-black/40 hover:bg-black/80 text-white/70 hover:text-white border-white/15 opacity-60 hover:opacity-100 hover:scale-105'
+          }`}
+        >
+          {isAudioPlaying ? <Volume2 size={18} className="animate-pulse" /> : <VolumeX size={18} />}
+        </button>
+
         {/* Auto Play / Pause Toggle */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
