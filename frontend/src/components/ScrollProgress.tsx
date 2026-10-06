@@ -75,10 +75,10 @@ export const ScrollProgress: React.FC<ScrollProgressProps> = ({ totalScenes, cur
                 className={`relative group cursor-pointer flex justify-center items-center rounded-full transition-all duration-300 ${
                   isCurrent ? 'w-2.5 h-2.5 bg-white' : showAsTiny ? 'w-1 h-1 bg-white/30' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
                 }`}
-                title={`Scene ${scene}`}
+                title={`Trang ${scene}`}
               >
                 <div className="absolute right-full mr-4 px-2 py-1 bg-black/70 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">
-                  Scene {scene}
+                  Trang {scene}
                 </div>
               </div>
             );

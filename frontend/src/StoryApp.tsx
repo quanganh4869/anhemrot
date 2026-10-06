@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { storySlides } from './data/slidesData';
 import { MorphStage } from './components/MorphStage';
 import { ScrollProgress } from './components/ScrollProgress';
-import { Maximize2, Minimize2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Maximize2, Minimize2, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const StoryApp: React.FC = () => {
   const [progress, setProgress] = useState<number>(0);
@@ -146,11 +146,11 @@ export const StoryApp: React.FC = () => {
   // Keyboard controls: ArrowDown, ArrowUp, Space
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowRight') {
         e.preventDefault();
         const next = Math.min(maxProgress, Math.floor(targetProgressRef.current + 1));
         scrollToSlide(next);
-      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         const prev = Math.max(0, Math.ceil(targetProgressRef.current - 1));
         scrollToSlide(prev);
@@ -197,6 +197,40 @@ export const StoryApp: React.FC = () => {
 
       {/* Pinned Presentation Stage with Morph Transitions */}
       <MorphStage slides={storySlides} progress={progress} />
+
+      {/* Page Number Indicator & Quick Navigator */}
+      <div className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-black/60 hover:bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-xl transition-all select-none">
+        <button
+          onClick={() => scrollToSlide(Math.max(0, currentSlideIndex - 2))}
+          disabled={currentSlideIndex <= 1}
+          aria-label="Trang trước"
+          title="Trang trước (Phím Mũi tên lên / Trái)"
+          className="p-1 rounded-full text-white/70 hover:text-white disabled:opacity-20 disabled:hover:text-white/70 transition-colors"
+        >
+          <ChevronLeft size={16} />
+        </button>
+
+        <div className="flex items-center gap-1.5 font-mono text-xs md:text-sm tracking-wider">
+          <span className="text-white/60 font-sans text-xs font-medium">Trang</span>
+          <span className="text-[#ED0081] font-bold text-sm md:text-base">
+            {String(currentSlideIndex).padStart(2, '0')}
+          </span>
+          <span className="text-white/30">/</span>
+          <span className="text-white/70">
+            {String(totalSlides).padStart(2, '0')}
+          </span>
+        </div>
+
+        <button
+          onClick={() => scrollToSlide(Math.min(maxProgress, currentSlideIndex))}
+          disabled={currentSlideIndex >= totalSlides}
+          aria-label="Trang sau"
+          title="Trang sau (Phím Mũi tên xuống / Phải / Space)"
+          className="p-1 rounded-full text-white/70 hover:text-white disabled:opacity-20 disabled:hover:text-white/70 transition-colors"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
 
       {/* Top Floating Controls (Subtle & Non-Intrusive) */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
