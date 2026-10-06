@@ -140,12 +140,15 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         }
       }
 
-      // Priority 3: both are speech bubbles (role === 'bubble')
+      // Priority 3: both are speech bubbles (role === 'bubble' and close in position)
       if (matchIdx === -1 && eA.role === 'bubble') {
         for (let i = 0; i < elemsB.length; i++) {
           if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble') {
-            matchIdx = i;
-            break;
+            const dist = Math.hypot(eA.left - elemsB[i].left, eA.top - elemsB[i].top);
+            if (dist < 45) {
+              matchIdx = i;
+              break;
+            }
           }
         }
       }
@@ -213,7 +216,7 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
           : eA.name === eB.name
           ? `name-${eA.name}`
           : eA.role === 'bubble' && eB.role === 'bubble'
-          ? 'role-bubble'
+          ? `bubble-${eA.top > 35 ? 'bottom' : 'top'}`
           : `m-${eA.id}-${eB.id}`;
 
         result.push({
