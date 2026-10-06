@@ -118,11 +118,13 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
     for (const eA of elemsA) {
       let matchIdx = -1;
 
-      // Priority 1: same name
+      // Priority 1: same name (if both have media, media must match)
       for (let i = 0; i < elemsB.length; i++) {
         if (!matchedBIndices.has(i) && elemsB[i].name === eA.name) {
-          matchIdx = i;
-          break;
+          if (!eA.media || !elemsB[i].media || eA.media === elemsB[i].media) {
+            matchIdx = i;
+            break;
+          }
         }
       }
 
@@ -136,20 +138,20 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         }
       }
 
-      // Priority 3: both are bubbles
-      if (matchIdx === -1 && eA.role === 'bubble') {
+      // Priority 3: both are text-only bubbles
+      if (matchIdx === -1 && eA.role === 'bubble' && !eA.media) {
         for (let i = 0; i < elemsB.length; i++) {
-          if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble') {
+          if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble' && !elemsB[i].media) {
             matchIdx = i;
             break;
           }
         }
       }
 
-      // Priority 4: both are captions
-      if (matchIdx === -1 && eA.role === 'caption') {
+      // Priority 4: both are text-only captions
+      if (matchIdx === -1 && eA.role === 'caption' && !eA.media) {
         for (let i = 0; i < elemsB.length; i++) {
-          if (!matchedBIndices.has(i) && elemsB[i].role === 'caption') {
+          if (!matchedBIndices.has(i) && elemsB[i].role === 'caption' && !elemsB[i].media) {
             matchIdx = i;
             break;
           }
