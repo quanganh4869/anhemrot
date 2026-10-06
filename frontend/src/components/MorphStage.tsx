@@ -12,6 +12,8 @@ interface RenderElement {
   role: 'background' | 'character' | 'decoration' | 'bubble' | 'caption';
   name: string;
   media?: string;
+  mediaB?: string;
+  crossfadeProgress?: number;
   left: number;
   top: number;
   width: number;
@@ -138,17 +140,43 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         }
       }
 
-      // Priority 3: both are text-only bubbles
-      if (matchIdx === -1 && eA.role === 'bubble' && !eA.media) {
+      // Priority 3: both are speech bubbles (role === 'bubble')
+      if (matchIdx === -1 && eA.role === 'bubble') {
         for (let i = 0; i < elemsB.length; i++) {
-          if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble' && !elemsB[i].media) {
+          if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble') {
             matchIdx = i;
             break;
           }
         }
       }
 
-      // Priority 4: both are text-only captions
+      // Priority 4: both are baby (crying baby <-> sleeping baby)
+      if (
+        matchIdx === -1 &&
+        (eA.name.includes('Baby') || eA.name === 'Picture 21')
+      ) {
+        for (let i = 0; i < elemsB.length; i++) {
+          if (
+            !matchedBIndices.has(i) &&
+            (elemsB[i].name.includes('Baby') || elemsB[i].name === 'Picture 21')
+          ) {
+            matchIdx = i;
+            break;
+          }
+        }
+      }
+
+      // Priority 5: same character role and same name
+      if (matchIdx === -1 && eA.role === 'character') {
+        for (let i = 0; i < elemsB.length; i++) {
+          if (!matchedBIndices.has(i) && elemsB[i].role === 'character' && elemsB[i].name === eA.name) {
+            matchIdx = i;
+            break;
+          }
+        }
+      }
+
+      // Priority 6: both are text-only captions
       if (matchIdx === -1 && eA.role === 'caption' && !eA.media) {
         for (let i = 0; i < elemsB.length; i++) {
           if (!matchedBIndices.has(i) && elemsB[i].role === 'caption' && !elemsB[i].media) {
@@ -177,12 +205,25 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         const opacityB = eB.opacity ?? 1;
         const opacity = lerp(opacityA, opacityB, t);
 
+        const isSameMedia = Boolean(eA.media && eB.media && eA.media === eB.media);
+
+        // STABLE KEY: Keep identical key across slides so React NEVER destroys the DOM node
+        const stableKey = isSameMedia
+          ? `media-${eA.media}`
+          : eA.name === eB.name
+          ? `name-${eA.name}`
+          : eA.role === 'bubble' && eB.role === 'bubble'
+          ? 'role-bubble'
+          : `m-${eA.id}-${eB.id}`;
+
         result.push({
-          key: `m-${eA.id}-${eB.id}`,
+          key: stableKey,
           type: eA.type,
           role: eA.role,
           name: eA.name,
-          media: isA ? eA.media : eB.media,
+          media: eA.media,
+          mediaB: !isSameMedia && eB.media ? eB.media : undefined,
+          crossfadeProgress: t,
           left,
           top,
           width,
@@ -196,12 +237,12 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
           slideNumber: isA ? slideA.slideNumber : slideB.slideNumber,
         });
       } else {
-        // Element only in A -> Fades out
+        // Element only in A -> Smooth linear fade out across transition
         const baseOpacityA = eA.opacity ?? 1;
-        const opacity = baseOpacityA * Math.max(0, 1 - t * 1.8);
-        if (opacity > 0.01) {
+        const opacity = baseOpacityA * (1 - t);
+        if (opacity > 0.005) {
           result.push({
-            key: `a-${eA.id}`,
+            key: eA.media ? `media-${eA.media}` : `a-${eA.id}`,
             type: eA.type,
             role: eA.role,
             name: eA.name,
@@ -222,15 +263,15 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       }
     }
 
-    // Elements only in B -> Fades in
+    // Elements only in B -> Smooth linear fade in across transition
     for (let i = 0; i < elemsB.length; i++) {
       if (!matchedBIndices.has(i)) {
         const eB = elemsB[i];
         const baseOpacityB = eB.opacity ?? 1;
-        const opacity = baseOpacityB * Math.max(0, Math.min(1, (t - 0.2) * 1.8));
-        if (opacity > 0.01) {
+        const opacity = baseOpacityB * t;
+        if (opacity > 0.005) {
           result.push({
-            key: `b-${eB.id}`,
+            key: eB.media ? `media-${eB.media}` : `b-${eB.id}`,
             type: eB.type,
             role: eB.role,
             name: eB.name,
@@ -281,7 +322,22 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
 };
 
 const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) => {
-  const { role, media, left, top, width, height, rotation, opacity, zIndex, fill, text, textOpacity = 1 } = element;
+  const {
+    role,
+    media,
+    mediaB,
+    crossfadeProgress = 0,
+    left,
+    top,
+    width,
+    height,
+    rotation,
+    opacity,
+    zIndex,
+    fill,
+    text,
+    textOpacity = 1,
+  } = element;
 
   // Render Image Element or Cloud Callout or Banner
   if (media) {
@@ -289,6 +345,43 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
     const isCry = media.includes('text_s19_8') || media.includes('text_s20_5') || (text && text.some((t) => t.includes('OE')));
     const isDecoration = (role === 'decoration' || isSvg) && !isCry;
 
+    // Crossfade between two different media images (e.g. Cloud 21 -> Cloud 22, Crying Baby -> Sleeping Baby)
+    if (mediaB) {
+      return (
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: `${left}%`,
+            top: `${top}%`,
+            width: `${width}%`,
+            height: `${height}%`,
+            zIndex,
+            opacity,
+            transform: rotation ? `rotate(${rotation}deg)` : undefined,
+            willChange: 'transform, opacity, left, top',
+          }}
+        >
+          {/* Media A (fading out smoothly) */}
+          <img
+            src={`/media/${media}`}
+            alt=""
+            loading="eager"
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{ opacity: 1 - crossfadeProgress }}
+          />
+          {/* Media B (fading in smoothly) */}
+          <img
+            src={`/media/${mediaB}`}
+            alt=""
+            loading="eager"
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{ opacity: crossfadeProgress }}
+          />
+        </div>
+      );
+    }
+
+    // Single persistent image: NEVER multiply by textOpacity so it stays rock solid without flickering
     return (
       <div
         className="absolute pointer-events-none"
@@ -298,7 +391,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           width: `${width}%`,
           height: `${height}%`,
           zIndex,
-          opacity: opacity * textOpacity,
+          opacity,
           transform: rotation ? `rotate(${rotation}deg)` : undefined,
           willChange: 'transform, opacity, left, top',
         }}
