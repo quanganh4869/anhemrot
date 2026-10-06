@@ -73,6 +73,19 @@ body::-webkit-scrollbar {
   animation: floatGentle 4s ease-in-out infinite;
 }
 
+@keyframes cryPop {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-cry {
+  animation: cryPop 1.2s ease-in-out infinite;
+}
+
 ::selection {
   background-color: rgba(237, 0, 129, 0.4);
   color: #ffffff;

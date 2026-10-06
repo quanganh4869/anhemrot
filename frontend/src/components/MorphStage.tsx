@@ -286,7 +286,8 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
   // Render Image Element or Cloud Callout or Banner
   if (media) {
     const isSvg = media.endsWith('.svg');
-    const isDecoration = role === 'decoration' || isSvg;
+    const isCry = media.includes('text_s19_8') || media.includes('text_s20_5') || (text && text.some((t) => t.includes('OE')));
+    const isDecoration = (role === 'decoration' || isSvg) && !isCry;
 
     return (
       <div
@@ -306,7 +307,9 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           src={`/media/${media}`}
           alt=""
           loading="eager"
-          className={`w-full h-full object-contain ${isDecoration ? 'animate-float-gentle' : ''}`}
+          className={`w-full h-full object-contain ${
+            isCry ? 'animate-cry drop-shadow-[0_4px_12px_rgba(237,0,129,0.35)]' : isDecoration ? 'animate-float-gentle' : ''
+          }`}
         />
       </div>
     );
