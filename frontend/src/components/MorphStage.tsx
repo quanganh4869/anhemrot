@@ -171,6 +171,9 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         const isA = t < 0.5;
         const textToUse = isA ? eA.text : eB.text;
         const textOpacity = isA ? Math.max(0, 1 - t * 2.2) : Math.max(0, (t - 0.5) * 2.2);
+        const opacityA = eA.opacity ?? 1;
+        const opacityB = eB.opacity ?? 1;
+        const opacity = lerp(opacityA, opacityB, t);
 
         result.push({
           key: `m-${eA.id}-${eB.id}`,
@@ -183,7 +186,7 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
           width,
           height,
           rotation,
-          opacity: 1,
+          opacity,
           zIndex,
           fill: isA ? eA.fill : eB.fill,
           text: textToUse,
@@ -192,7 +195,8 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         });
       } else {
         // Element only in A -> Fades out
-        const opacity = Math.max(0, 1 - t * 1.8);
+        const baseOpacityA = eA.opacity ?? 1;
+        const opacity = baseOpacityA * Math.max(0, 1 - t * 1.8);
         if (opacity > 0.01) {
           result.push({
             key: `a-${eA.id}`,
@@ -220,7 +224,8 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
     for (let i = 0; i < elemsB.length; i++) {
       if (!matchedBIndices.has(i)) {
         const eB = elemsB[i];
-        const opacity = Math.max(0, Math.min(1, (t - 0.2) * 1.8));
+        const baseOpacityB = eB.opacity ?? 1;
+        const opacity = baseOpacityB * Math.max(0, Math.min(1, (t - 0.2) * 1.8));
         if (opacity > 0.01) {
           result.push({
             key: `b-${eB.id}`,
