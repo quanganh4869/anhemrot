@@ -140,11 +140,16 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         }
       }
 
-      // Priority 3: both are speech bubbles (role === 'bubble' and close in position)
+      // Priority 3: both are speech bubbles (role === 'bubble' and close in position, but NEVER match different callout images)
       if (matchIdx === -1 && eA.role === 'bubble') {
         for (let i = 0; i < elemsB.length; i++) {
-          if (!matchedBIndices.has(i) && elemsB[i].role === 'bubble') {
-            const dist = Math.hypot(eA.left - elemsB[i].left, eA.top - elemsB[i].top);
+          const eB = elemsB[i];
+          if (
+            !matchedBIndices.has(i) &&
+            eB.role === 'bubble' &&
+            (!eA.media || !eB.media || eA.media === eB.media)
+          ) {
+            const dist = Math.hypot(eA.left - eB.left, eA.top - eB.top);
             if (dist < 45) {
               matchIdx = i;
               break;
@@ -194,12 +199,21 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         matchedBIndices.add(matchIdx);
         const eB = elemsB[matchIdx];
 
+        let posT = t;
+        let opT = t;
+        if (slideA.slideNumber === 25 && slideB.slideNumber === 26 && (eA.name === 'Rabbit Arms' || eA.name === 'Baby Held')) {
+          // Slide-up completes earlier by t = 0.65, so characters are completely in place before dialogue bubble appears!
+          posT = Math.min(1, t / 0.65);
+          // Opaque quickly during slide-up
+          opT = Math.min(1, t / 0.35);
+        }
+
         // Smoothly interpolate position, scale, rotation
-        const left = lerp(eA.left, eB.left, t);
-        const top = lerp(eA.top, eB.top, t);
-        const width = lerp(eA.width, eB.width, t);
-        const height = lerp(eA.height, eB.height, t);
-        const rotation = lerp(eA.rotation, eB.rotation, t);
+        const left = lerp(eA.left, eB.left, posT);
+        const top = lerp(eA.top, eB.top, posT);
+        const width = lerp(eA.width, eB.width, posT);
+        const height = lerp(eA.height, eB.height, posT);
+        const rotation = lerp(eA.rotation, eB.rotation, posT);
         const zIndex = Math.max(eA.zIndex, eB.zIndex);
 
         const isA = t < 0.5;
@@ -207,18 +221,36 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
         const textOpacity = isA ? Math.max(0, 1 - t * 2.2) : Math.max(0, (t - 0.5) * 2.2);
         const opacityA = eA.opacity ?? 1;
         const opacityB = eB.opacity ?? 1;
-        const opacity = lerp(opacityA, opacityB, t);
+        let opacity = lerp(opacityA, opacityB, opT);
+
+        // Slide 26 -> 27: Picture 8 shooting stars slide left and fade out cleanly
+        if (
+          slideA.slideNumber === 26 &&
+          slideB.slideNumber === 27 &&
+          (eA.name === 'Picture 8' || eA.media === 'image28.png')
+        ) {
+          opacity = lerp(opacityA, 0, Math.min(1, t / 0.7));
+        }
 
         const isSameMedia = Boolean(eA.media && eB.media && eA.media === eB.media);
 
-        // STABLE KEY: Keep identical key across slides so React NEVER destroys the DOM node
+        // STABLE KEY: Keep identical key across matching elements so React smoothly animates them
         const stableKey = isSameMedia
-          ? `media-${eA.media}`
+          ? `morph-${eA.id}-${eB.id}`
           : eA.name === eB.name
-          ? `name-${eA.name}`
-          : eA.role === 'bubble' && eB.role === 'bubble'
-          ? `bubble-${eA.top > 35 ? 'bottom' : 'top'}`
+          ? `name-${eA.name}-${eA.id}`
           : `m-${eA.id}-${eB.id}`;
+
+        // Slide 26 -> 27: Rabbit transformation starts after bubble 26 fades and blooms before bubble 27
+        let crossfadeT = t;
+        if (
+          (slideA.slideNumber === 26 && slideB.slideNumber === 27) ||
+          (slideA.slideNumber === 27 && slideB.slideNumber === 26)
+        ) {
+          if (eA.name === 'Rabbit Arms' || eB.name === 'Rabbit Arms') {
+            crossfadeT = Math.max(0, Math.min(1, (t - 0.15) / 0.6));
+          }
+        }
 
         result.push({
           key: stableKey,
@@ -227,7 +259,7 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
           name: eA.name,
           media: eA.media,
           mediaB: !isSameMedia && eB.media ? eB.media : undefined,
-          crossfadeProgress: t,
+          crossfadeProgress: crossfadeT,
           left,
           top,
           width,
@@ -243,10 +275,14 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       } else {
         // Element only in A -> Smooth linear fade out across transition
         const baseOpacityA = eA.opacity ?? 1;
-        const opacity = baseOpacityA * (1 - t);
+        let opacity = baseOpacityA * (1 - t);
+        if (eA.role === 'bubble' || eA.role === 'caption') {
+          // Bubble fades out cleanly in the first 35% of transition
+          opacity = baseOpacityA * Math.max(0, 1 - t / 0.35);
+        }
         if (opacity > 0.005) {
           result.push({
-            key: eA.media ? `media-${eA.media}` : `a-${eA.id}`,
+            key: `a-${eA.id}`,
             type: eA.type,
             role: eA.role,
             name: eA.name,
@@ -272,10 +308,20 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       if (!matchedBIndices.has(i)) {
         const eB = elemsB[i];
         const baseOpacityB = eB.opacity ?? 1;
-        const opacity = baseOpacityB * t;
+        let opacity = baseOpacityB * t;
+        if (eB.role === 'bubble' || eB.role === 'caption') {
+          if (slideB.slideNumber === 26 || slideB.slideNumber === 27) {
+            // Slide 26 & 27: dialogue bubble appears strictly AFTER character movement/cracking completes (t >= 0.65)
+            const bubbleT = Math.max(0, Math.min(1, (t - 0.65) / 0.35));
+            opacity = baseOpacityB * bubbleT;
+          } else {
+            const bubbleT = Math.max(0, Math.min(1, (t - 0.45) / 0.55));
+            opacity = baseOpacityB * bubbleT;
+          }
+        }
         if (opacity > 0.005) {
           result.push({
-            key: eB.media ? `media-${eB.media}` : `b-${eB.id}`,
+            key: `b-${eB.id}`,
             type: eB.type,
             role: eB.role,
             name: eB.name,
@@ -354,8 +400,12 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
     const isBabyRock = media.includes('image31_baby') || media.includes('image20_baby');
     const isDecoration = (role === 'decoration' || isSvg) && !isCry && !isBabyRock;
 
-    // Crossfade between two different media images (e.g. Cloud 21 -> Cloud 22, Crying Baby -> Sleeping Baby)
+    // Crossfade between two different media images (e.g. Cloud 21 -> Cloud 22, Crying Baby -> Sleeping Baby, Black Rabbit -> Cracked Rabbit)
     if (mediaB) {
+      const isRabbitTransformation =
+        (media?.includes('image30') && mediaB?.includes('image29')) ||
+        (media?.includes('image29') && mediaB?.includes('image30'));
+
       return (
         <div
           className="absolute pointer-events-none"
@@ -370,13 +420,13 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
             willChange: 'transform, opacity, left, top',
           }}
         >
-          {/* Media A (fading out smoothly) */}
+          {/* Media A (fading out smoothly, or solid base if rabbit transformation) */}
           <img
             src={`/media/${media}`}
             alt=""
             loading="eager"
             className="absolute inset-0 w-full h-full object-contain"
-            style={{ opacity: 1 - crossfadeProgress }}
+            style={{ opacity: isRabbitTransformation ? 1 : 1 - crossfadeProgress }}
           />
           {/* Media B (fading in smoothly) */}
           <img
@@ -391,6 +441,14 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
     }
 
     // Single persistent image: NEVER multiply by textOpacity so it stays rock solid without flickering
+    const bubbleScale = role === 'bubble' ? 0.9 + 0.1 * Math.min(1, opacity) : 1;
+    const transformStr = [
+      rotation ? `rotate(${rotation}deg)` : '',
+      bubbleScale !== 1 ? `scale(${bubbleScale})` : '',
+    ]
+      .filter(Boolean)
+      .join(' ') || undefined;
+
     return (
       <div
         className="absolute pointer-events-none"
@@ -401,7 +459,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           height: `${height}%`,
           zIndex,
           opacity,
-          transform: rotation ? `rotate(${rotation}deg)` : undefined,
+          transform: transformStr,
           willChange: 'transform, opacity, left, top',
         }}
       >
@@ -427,6 +485,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
   if (text && text.length > 0) {
     const isBanner = element.name.includes('Scroll') || fill === '#ED0081';
     const isCry = text.some((t) => t.includes('OE'));
+    const isLightSlide = (element.slideNumber >= 11 && element.slideNumber <= 15) || element.slideNumber === 29;
 
     return (
       <div
@@ -443,12 +502,18 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
         }}
       >
         <div
-          className={`flex flex-col items-center justify-center w-full ${
+          className={`flex flex-col w-full ${
             isBanner
-              ? 'bg-gradient-to-r from-[#FF007A] to-[#ED0081] text-white px-5 py-2 rounded-2xl font-black tracking-widest text-lg shadow-md uppercase border-2 border-white/60'
+              ? 'items-center justify-center bg-gradient-to-r from-[#FF007A] to-[#ED0081] text-white px-5 py-2 rounded-2xl font-black tracking-widest text-lg shadow-md uppercase border-2 border-white/60'
               : isCry
-              ? 'text-[#ED0081] font-black tracking-widest text-3xl animate-bounce'
-              : 'text-slate-800 dark:text-white font-medium text-xl'
+              ? 'items-center justify-center text-[#ED0081] font-black tracking-widest text-3xl animate-bounce'
+              : role === 'bubble'
+              ? isLightSlide
+                ? 'items-start justify-start text-left text-slate-900 font-semibold text-lg md:text-xl leading-relaxed'
+                : 'items-start justify-start text-left text-white font-medium text-lg md:text-xl leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]'
+              : isLightSlide
+              ? 'items-center justify-center text-slate-900 font-medium text-xl'
+              : 'items-center justify-center text-white font-medium text-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]'
           }`}
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >

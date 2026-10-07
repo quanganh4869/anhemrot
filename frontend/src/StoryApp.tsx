@@ -23,11 +23,19 @@ export const StoryApp: React.FC = () => {
   const maxProgress = totalSlides - 1; // 30
 
   useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
     if (initialSlideVal > 0) {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll > 0) {
         window.scrollTo({ top: (initialSlideVal / maxProgress) * maxScroll, behavior: 'instant' as any });
       }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' as any });
+      targetProgressRef.current = 0;
+      currentProgressRef.current = 0;
+      setProgress(0);
     }
   }, [initialSlideVal, maxProgress]);
 
@@ -110,6 +118,9 @@ export const StoryApp: React.FC = () => {
         targetProgressRef.current = Math.max(0, Math.min(maxProgress, p));
       }
     };
+
+    // Sync scroll immediately on mount
+    handleScroll();
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -221,8 +232,8 @@ export const StoryApp: React.FC = () => {
           <ChevronLeft size={16} />
         </button>
 
-        <div className="flex items-center gap-1.5 font-mono text-xs md:text-sm tracking-wider">
-          <span className="text-white/60 font-sans text-xs font-medium">Trang</span>
+        <div className="flex items-center gap-1.5 text-xs md:text-sm tracking-wider font-semibold">
+          <span className="text-white/60 text-xs font-medium">Trang</span>
           <span className="text-[#ED0081] font-bold text-sm md:text-base">
             {String(currentSlideIndex).padStart(2, '0')}
           </span>
