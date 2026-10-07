@@ -351,7 +351,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
       media.includes('text_s20_5') ||
       media.includes('text_s25_21') ||
       (text && text.some((t) => t.includes('OE')));
-    const isBabyRock = media.includes('image31_baby');
+    const isBabyRock = media.includes('image31_baby') || media.includes('image20_baby');
     const isDecoration = (role === 'decoration' || isSvg) && !isCry && !isBabyRock;
 
     // Crossfade between two different media images (e.g. Cloud 21 -> Cloud 22, Crying Baby -> Sleeping Baby)
@@ -430,9 +430,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
 
     return (
       <div
-        className={`absolute pointer-events-none flex p-1 ${
-          role === 'bubble' ? 'items-start justify-start text-left' : 'items-center justify-center text-center'
-        }`}
+        className="absolute pointer-events-none flex items-center justify-center text-center p-1"
         style={{
           left: `${left}%`,
           top: `${top}%`,
@@ -445,19 +443,17 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
         }}
       >
         <div
-          className={`flex flex-col w-full ${
+          className={`flex flex-col items-center justify-center w-full ${
             isBanner
-              ? 'items-center justify-center bg-gradient-to-r from-[#FF007A] to-[#ED0081] text-white px-5 py-2 rounded-2xl font-black tracking-widest text-lg shadow-md uppercase border-2 border-white/60'
+              ? 'bg-gradient-to-r from-[#FF007A] to-[#ED0081] text-white px-5 py-2 rounded-2xl font-black tracking-widest text-lg shadow-md uppercase border-2 border-white/60'
               : isCry
-              ? 'items-center justify-center text-[#ED0081] font-black tracking-widest text-3xl animate-bounce'
-              : role === 'bubble'
-              ? 'text-white font-medium text-base sm:text-lg md:text-xl lg:text-[22px] leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]'
-              : 'items-center justify-center text-white font-medium text-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]'
+              ? 'text-[#ED0081] font-black tracking-widest text-3xl animate-bounce'
+              : 'text-slate-800 dark:text-white font-medium text-xl'
           }`}
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           {text.map((t, i) => (
-            <p key={i} className="leading-relaxed">
+            <p key={i} className="leading-snug">
               {t}
             </p>
           ))}

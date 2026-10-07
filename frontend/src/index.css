@@ -91,19 +91,19 @@ body::-webkit-scrollbar {
     transform: rotate(0deg) translateY(0);
   }
   25% {
-    transform: rotate(-3.5deg) translateY(-2px);
+    transform: rotate(-5deg) translateY(-3px);
   }
   50% {
     transform: rotate(0deg) translateY(0);
   }
   75% {
-    transform: rotate(3.5deg) translateY(-2px);
+    transform: rotate(5deg) translateY(-3px);
   }
 }
 
 .animate-rock {
-  animation: babyRock 2.4s ease-in-out infinite;
-  transform-origin: 50% 90%;
+  animation: babyRock 1.8s ease-in-out infinite;
+  transform-origin: 50% 85%;
 }
 
 ::selection {
