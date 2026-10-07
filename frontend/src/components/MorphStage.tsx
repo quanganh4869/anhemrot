@@ -156,12 +156,13 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
       // Priority 4: both are baby (crying baby <-> sleeping baby)
       if (
         matchIdx === -1 &&
-        (eA.name.includes('Baby') || eA.name === 'Picture 21')
+        (eA.name.includes('Baby') || eA.name === 'Picture 21' || eA.media?.includes('baby'))
       ) {
         for (let i = 0; i < elemsB.length; i++) {
+          const eB = elemsB[i];
           if (
             !matchedBIndices.has(i) &&
-            (elemsB[i].name.includes('Baby') || elemsB[i].name === 'Picture 21')
+            (eB.name.includes('Baby') || eB.name === 'Picture 21' || eB.media?.includes('baby'))
           ) {
             matchIdx = i;
             break;
@@ -345,8 +346,13 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
   // Render Image Element or Cloud Callout or Banner
   if (media) {
     const isSvg = media.endsWith('.svg');
-    const isCry = media.includes('text_s19_8') || media.includes('text_s20_5') || (text && text.some((t) => t.includes('OE')));
-    const isDecoration = (role === 'decoration' || isSvg) && !isCry;
+    const isCry =
+      media.includes('text_s19_8') ||
+      media.includes('text_s20_5') ||
+      media.includes('text_s25_21') ||
+      (text && text.some((t) => t.includes('OE')));
+    const isBabyRock = media.includes('image31_baby');
+    const isDecoration = (role === 'decoration' || isSvg) && !isCry && !isBabyRock;
 
     // Crossfade between two different media images (e.g. Cloud 21 -> Cloud 22, Crying Baby -> Sleeping Baby)
     if (mediaB) {
@@ -404,7 +410,13 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           alt=""
           loading="eager"
           className={`w-full h-full object-contain ${
-            isCry ? 'animate-cry drop-shadow-[0_4px_12px_rgba(237,0,129,0.35)]' : isDecoration ? 'animate-float-gentle' : ''
+            isCry
+              ? 'animate-cry drop-shadow-[0_4px_12px_rgba(237,0,129,0.35)]'
+              : isBabyRock
+              ? 'animate-rock origin-bottom'
+              : isDecoration
+              ? 'animate-float-gentle'
+              : ''
           }`}
         />
       </div>
