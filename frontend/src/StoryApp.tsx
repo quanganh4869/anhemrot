@@ -5,13 +5,15 @@ import { ScrollProgress } from './components/ScrollProgress';
 import { Maximize2, Minimize2, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const StoryApp: React.FC = () => {
-  const [progress, setProgress] = useState<number>(0);
+  const initialSlideParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('slide') : null;
+  const initialSlideVal = initialSlideParam ? Math.max(0, parseFloat(initialSlideParam) - 1) : 0;
+  const [progress, setProgress] = useState<number>(initialSlideVal);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
 
-  const targetProgressRef = useRef<number>(0);
-  const currentProgressRef = useRef<number>(0);
+  const targetProgressRef = useRef<number>(initialSlideVal);
+  const currentProgressRef = useRef<number>(initialSlideVal);
   const animFrameRef = useRef<number | null>(null);
   const autoPlayTimerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -19,6 +21,15 @@ export const StoryApp: React.FC = () => {
 
   const totalSlides = storySlides.length; // 31
   const maxProgress = totalSlides - 1; // 30
+
+  useEffect(() => {
+    if (initialSlideVal > 0) {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (maxScroll > 0) {
+        window.scrollTo({ top: (initialSlideVal / maxProgress) * maxScroll, behavior: 'instant' as any });
+      }
+    }
+  }, [initialSlideVal, maxProgress]);
 
   // Music toggle function
   const toggleAudio = useCallback(() => {
