@@ -310,18 +310,20 @@ export const StoryApp: React.FC = () => {
       {/* Pinned Presentation Stage with Morph Transitions */}
       <MorphStage slides={storySlides} progress={progress} />
 
-      {/* Sponsor Link Overlay on Final Slide (Slide 31) */}
+      {/* Sponsor Link Minimal Floating on Final Slide (Slide 31) - No background box */}
       {currentSlideIndex >= 31 && (
-        <div className="fixed bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center animate-fade-in pointer-events-auto">
+        <div className="fixed top-[63%] sm:top-[65%] left-1/2 -translate-x-1/2 z-50 flex items-center justify-center animate-fade-in pointer-events-auto px-4">
           <a
             href="https://shopee.vn/dungdandade?uls_trackid=56s7m4up03lu"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#EE4D2D] to-[#FF7337] hover:from-[#d73211] hover:to-[#ee5a1f] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-[0_4px_25px_rgba(238,77,45,0.55)] border border-white/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95"
+            className="group flex items-center gap-1.5 sm:gap-2 text-white/90 hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
           >
-            <span className="text-white/80 font-normal">Nhà tài trợ:</span>
-            <span className="font-bold underline decoration-white/40 group-hover:decoration-white">dungdandade</span>
-            <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <span className="text-xs sm:text-sm font-light text-white/75">Nhà tài trợ:</span>
+            <span className="text-xs sm:text-sm font-semibold tracking-wide underline decoration-white/40 group-hover:decoration-white group-hover:text-orange-300 transition-colors">
+              dungdandade
+            </span>
+            <ExternalLink className="w-3.5 h-3.5 text-white/70 group-hover:text-orange-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </a>
         </div>
       )}
