@@ -76,22 +76,23 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
   }, []);
 
   // Compute Responsive Scale factor:
-  // - On mobile portrait: fit width with safe padding so all dialogue bubbles and characters fit without being cropped
-  // - On landscape / desktop: cover screen smoothly with zero black bars
+  // Using uniform contain-fit (Math.min(width / 1920, height / 1080))
+  // This guarantees 100% of the slide (including top & bottom edges) is always fully visible
+  // on every screen: Mobile (portrait & landscape), iPad / Tablets, and Desktop PCs.
   const scale = useMemo(() => {
     const { width, height } = viewport;
     const isPortrait = height > width;
 
+    // In portrait (phone & vertical tablet), add a slight safe margin so controls don't overlap slide edges
     if (isPortrait) {
-      // In mobile portrait, scale by width to keep full content visible
       const fitWidthScale = width / 1920;
       const fitHeightScale = height / 1080;
-      // Use contain-fit with slight boost so content is crisp and readable
-      return Math.min(fitWidthScale * 1.05, fitHeightScale * 0.95);
+      return Math.min(fitWidthScale * 0.96, fitHeightScale * 0.94);
     }
 
-    // In desktop / landscape / tablet, cover the entire screen (100% full screen, zero borders)
-    return Math.max(width / 1920, height / 1080);
+    // In landscape / iPad landscape / desktop:
+    // Pure contain-fit ensuring full top & bottom are never cropped
+    return Math.min(width / 1920, height / 1080);
   }, [viewport]);
 
   const total = slides.length;
