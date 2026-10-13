@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { storySlides } from './data/slidesData';
 import { MorphStage } from './components/MorphStage';
 import { ScrollProgress } from './components/ScrollProgress';
-import { Maximize2, Minimize2, Volume2, Volume1, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Maximize2, Minimize2, Volume2, Volume1, VolumeX, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
 export const StoryApp: React.FC = () => {
   const initialSlideParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('slide') : null;
@@ -310,16 +310,32 @@ export const StoryApp: React.FC = () => {
       {/* Pinned Presentation Stage with Morph Transitions */}
       <MorphStage slides={storySlides} progress={progress} />
 
-      {/* Bottom Center Slide Navigation (Only 2 arrows, placed at bottom center with safe-area padding for mobile) */}
-      <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 sm:gap-4 bg-black/75 hover:bg-black/90 active:bg-black/95 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 shadow-2xl transition-all select-none">
+      {/* Sponsor Link Overlay on Final Slide (Slide 31) */}
+      {currentSlideIndex >= 31 && (
+        <div className="fixed bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center animate-fade-in pointer-events-auto">
+          <a
+            href="https://shopee.vn/dungdandade?uls_trackid=56s7m4up03lu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#EE4D2D] to-[#FF7337] hover:from-[#d73211] hover:to-[#ee5a1f] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-[0_4px_25px_rgba(238,77,45,0.55)] border border-white/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            <span className="text-white/80 font-normal">Nhà tài trợ:</span>
+            <span className="font-bold underline decoration-white/40 group-hover:decoration-white">dungdandade</span>
+            <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </a>
+        </div>
+      )}
+
+      {/* Bottom Center Slide Navigation (Only 2 large transparent arrows, no black background) */}
+      <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6 sm:gap-10 transition-all select-none pointer-events-auto">
         <button
           onClick={() => scrollToSlide(Math.max(0, currentSlideIndex - 2))}
           disabled={currentSlideIndex <= 1}
           aria-label="Trang trước"
           title="Trang trước (Phím Mũi tên lên / Trái)"
-          className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white active:scale-90 hover:bg-white/10 disabled:opacity-20 disabled:hover:text-white/80 disabled:hover:bg-transparent transition-all"
+          className="p-1 rounded-full text-white/85 hover:text-white active:scale-90 hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] disabled:opacity-20 disabled:hover:scale-100 disabled:hover:text-white/85 transition-all cursor-pointer disabled:cursor-not-allowed"
         >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          <ChevronLeft className="w-9 h-9 sm:w-12 sm:h-12" strokeWidth={2.5} />
         </button>
 
         <button
@@ -327,9 +343,9 @@ export const StoryApp: React.FC = () => {
           disabled={currentSlideIndex >= totalSlides}
           aria-label="Trang sau"
           title="Trang sau (Phím Mũi tên xuống / Phải / Space)"
-          className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white active:scale-90 hover:bg-white/10 disabled:opacity-20 disabled:hover:text-white/80 disabled:hover:bg-transparent transition-all"
+          className="p-1 rounded-full text-white/85 hover:text-white active:scale-90 hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] disabled:opacity-20 disabled:hover:scale-100 disabled:hover:text-white/85 transition-all cursor-pointer disabled:cursor-not-allowed"
         >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          <ChevronRight className="w-9 h-9 sm:w-12 sm:h-12" strokeWidth={2.5} />
         </button>
       </div>
 
