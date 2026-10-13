@@ -75,16 +75,19 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
     };
   }, []);
 
-  // Compute Fullscreen Responsive Scale factor to eliminate all black bars
+  // Compute Responsive Scale factor:
+  // - On mobile portrait: fit width with safe padding so all dialogue bubbles and characters fit without being cropped
+  // - On landscape / desktop: cover screen smoothly with zero black bars
   const scale = useMemo(() => {
     const { width, height } = viewport;
-    const isPortrait = height > width && width < 768;
+    const isPortrait = height > width;
 
     if (isPortrait) {
-      // In mobile portrait, scale to fit content comfortably with slight zoom
-      const scaleW = width / 1920;
-      const scaleH = height / 1080;
-      return Math.max(scaleW * 1.7, scaleH * 0.75);
+      // In mobile portrait, scale by width to keep full content visible
+      const fitWidthScale = width / 1920;
+      const fitHeightScale = height / 1080;
+      // Use contain-fit with slight boost so content is crisp and readable
+      return Math.min(fitWidthScale * 1.05, fitHeightScale * 0.95);
     }
 
     // In desktop / landscape / tablet, cover the entire screen (100% full screen, zero borders)
@@ -371,7 +374,7 @@ export const MorphStage: React.FC<MorphStageProps> = ({ slides, progress }) => {
   );
 };
 
-const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) => {
+const RenderElementItem = React.memo<{ element: RenderElement }>(({ element }) => {
   const {
     role,
     media,
@@ -417,7 +420,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
             zIndex,
             opacity,
             transform: rotation ? `rotate(${rotation}deg)` : undefined,
-            willChange: 'transform, opacity, left, top',
+            willChange: 'transform, opacity',
           }}
         >
           {/* Media A (fading out smoothly, or solid base if rabbit transformation) */}
@@ -425,6 +428,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
             src={`/media/${media}`}
             alt=""
             loading="eager"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-contain"
             style={{ opacity: isRabbitTransformation ? 1 : 1 - crossfadeProgress }}
           />
@@ -433,6 +437,7 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
             src={`/media/${mediaB}`}
             alt=""
             loading="eager"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-contain"
             style={{ opacity: crossfadeProgress }}
           />
@@ -460,13 +465,14 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
           zIndex,
           opacity,
           transform: transformStr,
-          willChange: 'transform, opacity, left, top',
+          willChange: 'transform, opacity',
         }}
       >
         <img
           src={`/media/${media}`}
           alt=""
           loading="eager"
+          decoding="async"
           className={`w-full h-full object-contain ${
             isCry
               ? 'animate-cry drop-shadow-[0_4px_12px_rgba(237,0,129,0.35)]'
@@ -528,6 +534,8 @@ const RenderElementItem: React.FC<{ element: RenderElement }> = ({ element }) =>
   }
 
   return null;
-};
+});
+
+RenderElementItem.displayName = 'RenderElementItem';
 
 export default MorphStage;

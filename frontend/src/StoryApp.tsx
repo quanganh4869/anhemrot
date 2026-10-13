@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { storySlides } from './data/slidesData';
 import { MorphStage } from './components/MorphStage';
 import { ScrollProgress } from './components/ScrollProgress';
-import { Maximize2, Minimize2, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Maximize2, Minimize2, Volume2, Volume1, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const StoryApp: React.FC = () => {
   const initialSlideParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('slide') : null;
@@ -11,7 +11,12 @@ export const StoryApp: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(0.7);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
 
+  const prevVolumeRef = useRef<number>(0.7);
+  const volumeTimeoutRef = useRef<number | null>(null);
   const targetProgressRef = useRef<number>(initialSlideVal);
   const currentProgressRef = useRef<number>(initialSlideVal);
   const animFrameRef = useRef<number | null>(null);
@@ -39,12 +44,67 @@ export const StoryApp: React.FC = () => {
     }
   }, [initialSlideVal, maxProgress]);
 
+  // Preload images for current and upcoming slides to ensure smooth zero-jank transitions on production
+  useEffect(() => {
+    const currentIdx = Math.floor(progress);
+    const indicesToPreload = [currentIdx, currentIdx + 1, currentIdx + 2, currentIdx - 1];
+
+    indicesToPreload.forEach((idx) => {
+      if (idx >= 0 && idx < storySlides.length) {
+        storySlides[idx].elements.forEach((el) => {
+          if (el.media) {
+            const img = new Image();
+            img.decoding = 'async';
+            img.src = `/media/${el.media}`;
+          }
+        });
+      }
+    });
+  }, [Math.floor(progress)]);
+
+  const resetVolumeTimeout = useCallback(() => {
+    if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+    volumeTimeoutRef.current = window.setTimeout(() => {
+      setShowVolumeSlider(false);
+    }, 3500);
+  }, []);
+
+  const handleVolumeChange = useCallback((newVol: number) => {
+    userInteractedRef.current = true;
+    setVolume(newVol);
+    resetVolumeTimeout();
+
+    if (newVol > 0) {
+      setIsMuted(false);
+      prevVolumeRef.current = newVol;
+    } else {
+      setIsMuted(true);
+    }
+
+    if (audioRef.current) {
+      audioRef.current.volume = newVol;
+      if (newVol > 0 && audioRef.current.paused) {
+        audioRef.current.play().then(() => {
+          setIsAudioPlaying(true);
+        }).catch(() => {});
+      }
+    }
+  }, [resetVolumeTimeout]);
+
   // Music toggle function
   const toggleAudio = useCallback(() => {
     if (!audioRef.current) return;
     userInteractedRef.current = true;
+    setShowVolumeSlider(true);
+    resetVolumeTimeout();
 
     if (audioRef.current.paused) {
+      if (isMuted || volume === 0) {
+        const restored = prevVolumeRef.current > 0 ? prevVolumeRef.current : 0.7;
+        setVolume(restored);
+        setIsMuted(false);
+        audioRef.current.volume = restored;
+      }
       audioRef.current.play().then(() => {
         setIsAudioPlaying(true);
       }).catch((err) => {
@@ -54,14 +114,14 @@ export const StoryApp: React.FC = () => {
       audioRef.current.pause();
       setIsAudioPlaying(false);
     }
-  }, []);
+  }, [isMuted, volume, resetVolumeTimeout]);
 
   // Try auto-starting music on first user interaction (click or scroll)
   useEffect(() => {
     const handleFirstInteraction = () => {
       if (!userInteractedRef.current && audioRef.current) {
         userInteractedRef.current = true;
-        audioRef.current.volume = 0.7;
+        audioRef.current.volume = volume;
         audioRef.current.play().then(() => {
           setIsAudioPlaying(true);
         }).catch(() => {
@@ -92,8 +152,8 @@ export const StoryApp: React.FC = () => {
       if (!active) return;
 
       const diff = targetProgressRef.current - currentProgressRef.current;
-      if (Math.abs(diff) > 0.0005) {
-        currentProgressRef.current += diff * 0.12;
+      if (Math.abs(diff) > 0.0012) {
+        currentProgressRef.current += diff * 0.14;
         setProgress(currentProgressRef.current);
       }
 
@@ -154,13 +214,43 @@ export const StoryApp: React.FC = () => {
     };
   }, [isPlaying, maxProgress]);
 
+  const scrollAnimRef = useRef<number | null>(null);
+
   const scrollToSlide = useCallback(
     (slideIndex: number) => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (maxScroll > 0) {
-        const targetScrollY = (slideIndex / maxProgress) * maxScroll;
-        window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
-      }
+      if (maxScroll <= 0) return;
+
+      const targetScrollY = (slideIndex / maxProgress) * maxScroll;
+      const startScrollY = window.scrollY;
+      const distance = targetScrollY - startScrollY;
+      if (Math.abs(distance) < 1) return;
+
+      if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
+
+      const startTime = performance.now();
+      // Chuyển trang chậm lại 5 lần (~2500ms thay vì ~500ms)
+      const duration = 2500;
+
+      const easeInOutCubic = (t: number) =>
+        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      const step = (now: number) => {
+        const elapsed = now - startTime;
+        const progressTime = Math.min(1, elapsed / duration);
+        const eased = easeInOutCubic(progressTime);
+        const currentY = startScrollY + distance * eased;
+
+        window.scrollTo({ top: currentY, behavior: 'instant' as any });
+
+        if (progressTime < 1) {
+          scrollAnimRef.current = requestAnimationFrame(step);
+        } else {
+          scrollAnimRef.current = null;
+        }
+      };
+
+      scrollAnimRef.current = requestAnimationFrame(step);
     },
     [maxProgress]
   );
@@ -220,78 +310,96 @@ export const StoryApp: React.FC = () => {
       {/* Pinned Presentation Stage with Morph Transitions */}
       <MorphStage slides={storySlides} progress={progress} />
 
-      {/* Page Number Indicator & Quick Navigator */}
-      <div className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-black/60 hover:bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-xl transition-all select-none">
+      {/* Bottom Center Slide Navigation (Only 2 arrows, placed at bottom center with safe-area padding for mobile) */}
+      <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 sm:gap-4 bg-black/75 hover:bg-black/90 active:bg-black/95 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 shadow-2xl transition-all select-none">
         <button
           onClick={() => scrollToSlide(Math.max(0, currentSlideIndex - 2))}
           disabled={currentSlideIndex <= 1}
           aria-label="Trang trước"
           title="Trang trước (Phím Mũi tên lên / Trái)"
-          className="p-1 rounded-full text-white/70 hover:text-white disabled:opacity-20 disabled:hover:text-white/70 transition-colors"
+          className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white active:scale-90 hover:bg-white/10 disabled:opacity-20 disabled:hover:text-white/80 disabled:hover:bg-transparent transition-all"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
-
-        <div className="flex items-center gap-1.5 text-xs md:text-sm tracking-wider font-semibold">
-          <span className="text-white/60 text-xs font-medium">Trang</span>
-          <span className="text-[#ED0081] font-bold text-sm md:text-base">
-            {String(currentSlideIndex).padStart(2, '0')}
-          </span>
-          <span className="text-white/30">/</span>
-          <span className="text-white/70">
-            {String(totalSlides).padStart(2, '0')}
-          </span>
-        </div>
 
         <button
           onClick={() => scrollToSlide(Math.min(maxProgress, currentSlideIndex))}
           disabled={currentSlideIndex >= totalSlides}
           aria-label="Trang sau"
           title="Trang sau (Phím Mũi tên xuống / Phải / Space)"
-          className="p-1 rounded-full text-white/70 hover:text-white disabled:opacity-20 disabled:hover:text-white/70 transition-colors"
+          className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white active:scale-90 hover:bg-white/10 disabled:opacity-20 disabled:hover:text-white/80 disabled:hover:bg-transparent transition-all"
         >
-          <ChevronRight size={16} />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       </div>
 
-      {/* Top Floating Controls (Subtle & Non-Intrusive) */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        {/* Music Audio Toggle Button */}
-        <button
-          onClick={toggleAudio}
-          aria-label={isAudioPlaying ? 'Tắt nhạc' : 'Bật nhạc'}
-          title={isAudioPlaying ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
-          className={`p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
-            isAudioPlaying
-              ? 'bg-[#ED0081] text-white border-white/30 shadow-[0_0_15px_rgba(237,0,129,0.5)] scale-105'
-              : 'bg-black/40 hover:bg-black/80 text-white/70 hover:text-white border-white/15 opacity-60 hover:opacity-100 hover:scale-105'
-          }`}
+      {/* Top Floating Controls (Subtle & Non-Intrusive, Mobile Responsive) */}
+      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 flex items-center gap-1.5 sm:gap-2">
+        {/* Music Audio Toggle & Volume Slider */}
+        <div
+          className="relative flex items-center"
+          onMouseEnter={() => {
+            if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
+            setShowVolumeSlider(true);
+          }}
+          onMouseLeave={() => setShowVolumeSlider(false)}
         >
-          {isAudioPlaying ? <Volume2 size={18} className="animate-pulse" /> : <VolumeX size={18} />}
-        </button>
+          {/* Collapsible Volume Slider */}
+          <div
+            className={`flex items-center gap-1.5 sm:gap-2 overflow-hidden transition-all duration-300 ease-out bg-black/75 backdrop-blur-md border border-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 mr-1 sm:mr-1.5 shadow-xl ${
+              showVolumeSlider
+                ? 'w-28 sm:w-36 opacity-100 pointer-events-auto'
+                : 'w-0 opacity-0 pointer-events-none p-0 border-0 m-0'
+            }`}
+          >
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={isMuted ? 0 : volume}
+              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+              aria-label="Âm lượng nhạc"
+              className="w-14 sm:w-20 h-1.5 bg-white/25 rounded-lg appearance-none cursor-pointer accent-[#ED0081] focus:outline-none"
+            />
+            <span className="text-[10px] sm:text-[11px] font-semibold text-white/90 tabular-nums min-w-[24px] sm:min-w-[28px] text-right">
+              {Math.round((isMuted ? 0 : volume) * 100)}%
+            </span>
+          </div>
 
-        {/* Auto Play / Pause Toggle */}
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          aria-label={isPlaying ? 'Tạm dừng' : 'Tự động phát'}
-          title={isPlaying ? 'Tạm dừng' : 'Tự động chiếu như video'}
-          className={`p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
-            isPlaying
-              ? 'bg-[#ED0081] text-white border-white/30 scale-105 shadow-[0_0_15px_rgba(237,0,129,0.5)]'
-              : 'bg-black/40 hover:bg-black/80 text-white/70 hover:text-white border-white/15 opacity-60 hover:opacity-100 hover:scale-105'
-          }`}
-        >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-        </button>
+          {/* Music Audio Toggle Button */}
+          <button
+            onClick={toggleAudio}
+            aria-label={isAudioPlaying && !isMuted && volume > 0 ? 'Tắt nhạc' : 'Bật nhạc'}
+            title={isAudioPlaying && !isMuted && volume > 0 ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
+            className={`p-2 sm:p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
+              isAudioPlaying && !isMuted && volume > 0
+                ? 'bg-[#ED0081] text-white border-white/30 shadow-[0_0_15px_rgba(237,0,129,0.5)] scale-105'
+                : 'bg-black/50 hover:bg-black/80 text-white/70 hover:text-white border-white/15 opacity-70 hover:opacity-100 hover:scale-105'
+            }`}
+          >
+            {!isAudioPlaying || isMuted || volume === 0 ? (
+              <VolumeX className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            ) : volume < 0.5 ? (
+              <Volume1 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            ) : (
+              <Volume2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 animate-pulse" />
+            )}
+          </button>
+        </div>
 
         {/* Fullscreen Button */}
         <button
           onClick={toggleFullscreen}
           aria-label="Toggle Fullscreen"
           title="Toàn màn hình"
-          className="p-2.5 rounded-full bg-black/40 hover:bg-black/80 text-white/70 hover:text-white backdrop-blur-md border border-white/15 transition-all duration-300 opacity-60 hover:opacity-100 hover:scale-105"
+          className="p-2 sm:p-2.5 rounded-full bg-black/50 hover:bg-black/80 text-white/70 hover:text-white backdrop-blur-md border border-white/15 transition-all duration-300 opacity-70 hover:opacity-100 hover:scale-105"
         >
-          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          {isFullscreen ? (
+            <Minimize2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+          ) : (
+            <Maximize2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+          )}
         </button>
       </div>
 

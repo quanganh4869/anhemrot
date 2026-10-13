@@ -48,7 +48,7 @@ export const ScrollProgress: React.FC<ScrollProgressProps> = ({ totalScenes, cur
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.3 }}
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-2 bg-black/20 backdrop-blur-sm rounded-full px-1.5 py-3"
+          className="hidden sm:flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-2 bg-black/20 backdrop-blur-sm rounded-full px-1.5 py-3"
         >
           {scenes.map((scene) => {
             const isCurrent = scene === currentScene;
